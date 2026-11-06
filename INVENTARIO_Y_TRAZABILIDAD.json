@@ -1,0 +1,436 @@
+{
+  "sistema": "Sistema de Monitoreo Sismologico y Alerta Temprana",
+  "version_preparacion": "2026-11-06",
+  "archivos_fuente": {
+    "01_creacion_tablas.sql": {
+      "path": "sql/modulos/esquema/01_creacion_tablas.sql",
+      "hash_fuente_sha256": "ef318994883d60ce3cade52c9af0cb5c7b67acecc818e28dee3e6dd84a5a13e3",
+      "hash_repo_sha256": "ef318994883d60ce3cade52c9af0cb5c7b67acecc818e28dee3e6dd84a5a13e3",
+      "ajustes_no_funcionales": []
+    },
+    "02_pruebas_4_1.sql": {
+      "path": "sql/modulos/esquema/02_pruebas_4_1.sql",
+      "hash_fuente_sha256": "40449186519122ba6bf574edd4ae1e6fe2759962fdbaec25838c7c7253088b51",
+      "hash_repo_sha256": "40449186519122ba6bf574edd4ae1e6fe2759962fdbaec25838c7c7253088b51",
+      "ajustes_no_funcionales": []
+    },
+    "03_carga_inicial_4_2.sql": {
+      "path": "sql/modulos/carga/03_carga_inicial_4_2.sql",
+      "hash_fuente_sha256": "c35691f536ea3ac0f6d3b8e2ba765d3ec5ee5a133b41db3e94dde35589c7f753",
+      "hash_repo_sha256": "c35691f536ea3ac0f6d3b8e2ba765d3ec5ee5a133b41db3e94dde35589c7f753",
+      "ajustes_no_funcionales": []
+    },
+    "04_verificacion_carga_4_2.sql": {
+      "path": "sql/modulos/carga/04_verificacion_carga_4_2.sql",
+      "hash_fuente_sha256": "d3960f671bf21c75c1064c8de44b5ad48bdad6ea96766d195c532d74d4f7064b",
+      "hash_repo_sha256": "d3960f671bf21c75c1064c8de44b5ad48bdad6ea96766d195c532d74d4f7064b",
+      "ajustes_no_funcionales": []
+    },
+    "05_importacion_igp_4_2.sql": {
+      "path": "sql/modulos/carga/05_importacion_igp_4_2.sql",
+      "hash_fuente_sha256": "73c66f6a44cab4b2e5d17a67470c3471211e8ea77930e8deb67ebbebb4ad5f53",
+      "hash_repo_sha256": "a28f2dcb32ee8edd2b40497b6121eecad56369fbd9597270aecb2f2af5fb07fa",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "06_verificacion_igp_4_2.sql": {
+      "path": "sql/modulos/carga/06_verificacion_igp_4_2.sql",
+      "hash_fuente_sha256": "dc60af3820bbf2cc9828fa446bf63fa2502d11a069f28c300bb5a86d26446751",
+      "hash_repo_sha256": "dc60af3820bbf2cc9828fa446bf63fa2502d11a069f28c300bb5a86d26446751",
+      "ajustes_no_funcionales": []
+    },
+    "07_simulacion_datos_4_3.sql": {
+      "path": "sql/modulos/carga/07_simulacion_datos_4_3.sql",
+      "hash_fuente_sha256": "2ee9ed72a96bba559ff9b8546f45de591e376fa808e82e29a816e7076bbb3d33",
+      "hash_repo_sha256": "2ee9ed72a96bba559ff9b8546f45de591e376fa808e82e29a816e7076bbb3d33",
+      "ajustes_no_funcionales": []
+    },
+    "08_verificacion_simulacion_4_3.sql": {
+      "path": "sql/modulos/carga/08_verificacion_simulacion_4_3.sql",
+      "hash_fuente_sha256": "047c83be798b6097b7bb23641e6a759eb72389d89009cb8f7071b4cc057aece2",
+      "hash_repo_sha256": "047c83be798b6097b7bb23641e6a759eb72389d89009cb8f7071b4cc057aece2",
+      "ajustes_no_funcionales": []
+    },
+    "09_vistas_4_4.sql": {
+      "path": "sql/modulos/logica/09_vistas_4_4.sql",
+      "hash_fuente_sha256": "d5eddbfc2760a15c5df9522cc5ed30ebecbf875643383e80dd56768452bf25a9",
+      "hash_repo_sha256": "d5eddbfc2760a15c5df9522cc5ed30ebecbf875643383e80dd56768452bf25a9",
+      "ajustes_no_funcionales": []
+    },
+    "10_verificacion_vistas_4_4.sql": {
+      "path": "sql/modulos/logica/10_verificacion_vistas_4_4.sql",
+      "hash_fuente_sha256": "7952779e046f5f19b73e3e837b639aac362332be7f899bb4b1e9ade7c66f99dc",
+      "hash_repo_sha256": "7952779e046f5f19b73e3e837b639aac362332be7f899bb4b1e9ade7c66f99dc",
+      "ajustes_no_funcionales": []
+    },
+    "11_procedimientos_4_5.sql": {
+      "path": "sql/modulos/logica/11_procedimientos_4_5.sql",
+      "hash_fuente_sha256": "6b2e57dd2c9dfb7c8cba0dd03d8546f002fc1b9b7d8389663233ded3a29a40be",
+      "hash_repo_sha256": "6b2e57dd2c9dfb7c8cba0dd03d8546f002fc1b9b7d8389663233ded3a29a40be",
+      "ajustes_no_funcionales": []
+    },
+    "12_pruebas_procedimientos_4_5.sql": {
+      "path": "sql/modulos/logica/12_pruebas_procedimientos_4_5.sql",
+      "hash_fuente_sha256": "2733a6173a8c9c170cb3ddd6c70f50d750890c517c7cc27ab52e10f5e33e2c0b",
+      "hash_repo_sha256": "2733a6173a8c9c170cb3ddd6c70f50d750890c517c7cc27ab52e10f5e33e2c0b",
+      "ajustes_no_funcionales": []
+    },
+    "13_triggers_4_6.sql": {
+      "path": "sql/modulos/logica/13_triggers_4_6.sql",
+      "hash_fuente_sha256": "4ecc95525ef1d6071d1e2fc5f38bf9dd50357c56809d3fe8cc99091c86fc0e2c",
+      "hash_repo_sha256": "4ecc95525ef1d6071d1e2fc5f38bf9dd50357c56809d3fe8cc99091c86fc0e2c",
+      "ajustes_no_funcionales": []
+    },
+    "14_pruebas_triggers_4_6.sql": {
+      "path": "sql/modulos/logica/14_pruebas_triggers_4_6.sql",
+      "hash_fuente_sha256": "4fe06f9c58028f7562bcbfe10feb085c9e390af3629f5d8a95b4a9c1903761c7",
+      "hash_repo_sha256": "4fe06f9c58028f7562bcbfe10feb085c9e390af3629f5d8a95b4a9c1903761c7",
+      "ajustes_no_funcionales": []
+    },
+    "15_consultas_5_1.sql": {
+      "path": "sql/modulos/consultas/15_consultas_5_1.sql",
+      "hash_fuente_sha256": "62ec7e55937d298e4a3c25ebd88f5c7fd06d1921bda45c056bd9e005a92b7c7e",
+      "hash_repo_sha256": "62ec7e55937d298e4a3c25ebd88f5c7fd06d1921bda45c056bd9e005a92b7c7e",
+      "ajustes_no_funcionales": []
+    },
+    "16_verificacion_consultas_5_1.sql": {
+      "path": "sql/modulos/consultas/16_verificacion_consultas_5_1.sql",
+      "hash_fuente_sha256": "2250bb54babe74f5d3668fd7a1b9af30fb628d6e71eba0c62b7633faa5c33afe",
+      "hash_repo_sha256": "2250bb54babe74f5d3668fd7a1b9af30fb628d6e71eba0c62b7633faa5c33afe",
+      "ajustes_no_funcionales": []
+    },
+    "17_crear_bases_5_2.sql": {
+      "path": "sql/modulos/preparacion/17_crear_bases_5_2.sql",
+      "hash_fuente_sha256": "f9f1e9dd15e6033edff9b168be4e2e049f2674355bedadf075d70c72103b7033",
+      "hash_repo_sha256": "f9f1e9dd15e6033edff9b168be4e2e049f2674355bedadf075d70c72103b7033",
+      "ajustes_no_funcionales": []
+    },
+    "18_generar_experimento_5_2.sql": {
+      "path": "sql/modulos/preparacion/18_generar_experimento_5_2.sql",
+      "hash_fuente_sha256": "41b8cb5d8e83004e9b95c639f13b5db7f7277bfd69a967eb5534565aa809e50e",
+      "hash_repo_sha256": "3de64feb5ed4a5039a018eabf4e5930b0a3231e97a92bf1bfd0315eb1fed859e",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados.",
+        "Rutas de inclusion relativas al directorio del generador."
+      ]
+    },
+    "19_verificar_experimento_5_2.sql": {
+      "path": "sql/modulos/preparacion/19_verificar_experimento_5_2.sql",
+      "hash_fuente_sha256": "dd2bcdc2da5d2b53a319a6492d5b4eddd826286d920f9d73f2fcf7ef65820cc2",
+      "hash_repo_sha256": "dd2bcdc2da5d2b53a319a6492d5b4eddd826286d920f9d73f2fcf7ef65820cc2",
+      "ajustes_no_funcionales": []
+    },
+    "21_plan_base_consulta_1_5_3_1.sql": {
+      "path": "sql/modulos/planes/21_plan_base_consulta_1_5_3_1.sql",
+      "hash_fuente_sha256": "fd2e94cbf387a2bad2c76e0a009855975c277db5a41e45e4b9873d9f92b42528",
+      "hash_repo_sha256": "fd2e94cbf387a2bad2c76e0a009855975c277db5a41e45e4b9873d9f92b42528",
+      "ajustes_no_funcionales": []
+    },
+    "22_indice_consulta_1_5_3_1.sql": {
+      "path": "sql/modulos/planes/22_indice_consulta_1_5_3_1.sql",
+      "hash_fuente_sha256": "5ad5bafec7304d2ff0c8ab5e0dde1957b5973940a88c0301936ceb820a68e8f3",
+      "hash_repo_sha256": "5ad5bafec7304d2ff0c8ab5e0dde1957b5973940a88c0301936ceb820a68e8f3",
+      "ajustes_no_funcionales": []
+    },
+    "23_plan_optimizado_consulta_1_5_3_1.sql": {
+      "path": "sql/modulos/planes/23_plan_optimizado_consulta_1_5_3_1.sql",
+      "hash_fuente_sha256": "a2c7b9877d639d86bf367a1e5cf911dca8ff34692a6f81e426946d06f84d5cf5",
+      "hash_repo_sha256": "a2c7b9877d639d86bf367a1e5cf911dca8ff34692a6f81e426946d06f84d5cf5",
+      "ajustes_no_funcionales": []
+    },
+    "24_plan_base_consulta_2_5_3_2.sql": {
+      "path": "sql/modulos/planes/24_plan_base_consulta_2_5_3_2.sql",
+      "hash_fuente_sha256": "8076f4194a55065ab19ede09e0c8fc6f6ec204823ec572382473cbc2b869f206",
+      "hash_repo_sha256": "8076f4194a55065ab19ede09e0c8fc6f6ec204823ec572382473cbc2b869f206",
+      "ajustes_no_funcionales": []
+    },
+    "25_indice_consulta_2_5_3_2.sql": {
+      "path": "sql/modulos/planes/25_indice_consulta_2_5_3_2.sql",
+      "hash_fuente_sha256": "6fcf61d80e7311e84b541a29423cd189b0afa626a44c05fb36e58c991eb8a06c",
+      "hash_repo_sha256": "6fcf61d80e7311e84b541a29423cd189b0afa626a44c05fb36e58c991eb8a06c",
+      "ajustes_no_funcionales": []
+    },
+    "26_plan_optimizado_consulta_2_5_3_2.sql": {
+      "path": "sql/modulos/planes/26_plan_optimizado_consulta_2_5_3_2.sql",
+      "hash_fuente_sha256": "1c105d04ee4e830d044718e904012b56b19080495ed14109de3f05c1728264b7",
+      "hash_repo_sha256": "1c105d04ee4e830d044718e904012b56b19080495ed14109de3f05c1728264b7",
+      "ajustes_no_funcionales": []
+    },
+    "27_plan_base_consulta_3_5_3_3.sql": {
+      "path": "sql/modulos/planes/27_plan_base_consulta_3_5_3_3.sql",
+      "hash_fuente_sha256": "718e3ce75209d23b37c372a3e3ead20173b0e8a3b68dd3e5d0f4c4002df851f8",
+      "hash_repo_sha256": "718e3ce75209d23b37c372a3e3ead20173b0e8a3b68dd3e5d0f4c4002df851f8",
+      "ajustes_no_funcionales": []
+    },
+    "28_indice_consulta_3_5_3_3.sql": {
+      "path": "sql/modulos/planes/28_indice_consulta_3_5_3_3.sql",
+      "hash_fuente_sha256": "f605be81f3a5e0a1904b9b8719e02475c4ff1ba55cdd221d6cfd7a4b4ea831ee",
+      "hash_repo_sha256": "f605be81f3a5e0a1904b9b8719e02475c4ff1ba55cdd221d6cfd7a4b4ea831ee",
+      "ajustes_no_funcionales": []
+    },
+    "29_plan_optimizado_consulta_3_5_3_3.sql": {
+      "path": "sql/modulos/planes/29_plan_optimizado_consulta_3_5_3_3.sql",
+      "hash_fuente_sha256": "6cb5c999ad9e2628dacfe5e954cf88692fceacf0ca5cb795a8994d43cedf9f63",
+      "hash_repo_sha256": "6cb5c999ad9e2628dacfe5e954cf88692fceacf0ca5cb795a8994d43cedf9f63",
+      "ajustes_no_funcionales": []
+    },
+    "30_plan_base_consulta_4_5_3_4.sql": {
+      "path": "sql/modulos/planes/30_plan_base_consulta_4_5_3_4.sql",
+      "hash_fuente_sha256": "5dc418f4a15593a34d0a5e88db687b492f261e5dbf1865b6ac9442f4f603f1e9",
+      "hash_repo_sha256": "5dc418f4a15593a34d0a5e88db687b492f261e5dbf1865b6ac9442f4f603f1e9",
+      "ajustes_no_funcionales": []
+    },
+    "31_indice_consulta_4_5_3_4.sql": {
+      "path": "sql/modulos/planes/31_indice_consulta_4_5_3_4.sql",
+      "hash_fuente_sha256": "c197a943c7eeeb6ddc6bab6ed3694fccbfae704a48fd48c6698a18c1df66d673",
+      "hash_repo_sha256": "c197a943c7eeeb6ddc6bab6ed3694fccbfae704a48fd48c6698a18c1df66d673",
+      "ajustes_no_funcionales": []
+    },
+    "32_plan_optimizado_consulta_4_5_3_4.sql": {
+      "path": "sql/modulos/planes/32_plan_optimizado_consulta_4_5_3_4.sql",
+      "hash_fuente_sha256": "e31402b7fed7702c45b20414a6b005f14262d1e9820403e95e544df3b11ba965",
+      "hash_repo_sha256": "e31402b7fed7702c45b20414a6b005f14262d1e9820403e95e544df3b11ba965",
+      "ajustes_no_funcionales": []
+    },
+    "33_plan_base_consulta_5_5_3_5.sql": {
+      "path": "sql/modulos/planes/33_plan_base_consulta_5_5_3_5.sql",
+      "hash_fuente_sha256": "dcc817da0dfcedaf6fdb1b6458122a0d3ca033434f318374eea79f4d7df26763",
+      "hash_repo_sha256": "dcc817da0dfcedaf6fdb1b6458122a0d3ca033434f318374eea79f4d7df26763",
+      "ajustes_no_funcionales": []
+    },
+    "34_indices_consulta_5_5_3_5.sql": {
+      "path": "sql/modulos/planes/34_indices_consulta_5_5_3_5.sql",
+      "hash_fuente_sha256": "b95de00b4aa7d68f9c76d6b6d41552b77a97dfb90f5863688d3809d104f7013d",
+      "hash_repo_sha256": "b95de00b4aa7d68f9c76d6b6d41552b77a97dfb90f5863688d3809d104f7013d",
+      "ajustes_no_funcionales": []
+    },
+    "35_plan_optimizado_consulta_5_5_3_5.sql": {
+      "path": "sql/modulos/planes/35_plan_optimizado_consulta_5_5_3_5.sql",
+      "hash_fuente_sha256": "2007afaff9db83eea76506ce7e3d90f848c0b1eaccc1f3e58aa20628fa83534e",
+      "hash_repo_sha256": "2007afaff9db83eea76506ce7e3d90f848c0b1eaccc1f3e58aa20628fa83534e",
+      "ajustes_no_funcionales": []
+    },
+    "36_diagnostico_plataforma_5_4.sql": {
+      "path": "sql/modulos/diagnostico/36_diagnostico_plataforma_5_4.sql",
+      "hash_fuente_sha256": "c276c523f81d60765eb7a3b3d21fa152581d2fd91ff82026ba68d957c8c0eb8e",
+      "hash_repo_sha256": "c276c523f81d60765eb7a3b3d21fa152581d2fd91ff82026ba68d957c8c0eb8e",
+      "ajustes_no_funcionales": []
+    },
+    "38_piloto_mediciones_c1_5_5.sql": {
+      "path": "sql/modulos/mediciones/38_piloto_mediciones_c1_5_5.sql",
+      "hash_fuente_sha256": "e613b9059c8437181afce8248b2fc55ff3f54ed5c238131c28573cc486386bc3",
+      "hash_repo_sha256": "e3d3cc7e679ac184a0be049552709d65f66090f4b560f9f1deca441d73054d8d",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "39_piloto_mediciones_c1_con_indice_5_5.sql": {
+      "path": "sql/modulos/mediciones/39_piloto_mediciones_c1_con_indice_5_5.sql",
+      "hash_fuente_sha256": "cfee0bbca7a923ccbb43e0143bc39f00004bd0fce711c65557a9dcf32dce2a08",
+      "hash_repo_sha256": "ef3580f0b6276249d56da125605f0585257f1c210af7e8a8042a9db8a4452a67",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "40_mediciones_c1_10000_5_5.sql": {
+      "path": "sql/modulos/mediciones/40_mediciones_c1_10000_5_5.sql",
+      "hash_fuente_sha256": "b2bc6a8682d594166fdad817f63e8b78908d09289d6fb28884924c802f0e5d26",
+      "hash_repo_sha256": "8173f0e494162d26cf76da32e3ab39dc36d7f9dfc44777b6ad877f3792f1e17c",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "41_mediciones_c1_100000_5_5.sql": {
+      "path": "sql/modulos/mediciones/41_mediciones_c1_100000_5_5.sql",
+      "hash_fuente_sha256": "5ebe1835e612251d080efe2a24a9b0471abc23c3895bf107019a33bc1d2e584d",
+      "hash_repo_sha256": "4605c6c97964f6356e6705a7fbe1260c7598a99a24a159f0beb42cd1ec19eddb",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "42_mediciones_c1_1000000_5_5.sql": {
+      "path": "sql/modulos/mediciones/42_mediciones_c1_1000000_5_5.sql",
+      "hash_fuente_sha256": "2a2cbee639ab183bd9ea68e0fc51c9fe299731dd03a7e35a41132d63da315538",
+      "hash_repo_sha256": "eafab42c7be3092b9dfbe955a2e2bef1f8249542b7977e8a8f29ecf619a6de5a",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "43_mediciones_c2_1000_5_5.sql": {
+      "path": "sql/modulos/mediciones/43_mediciones_c2_1000_5_5.sql",
+      "hash_fuente_sha256": "15402f2d096567da2b7ddc88a15e22ab8526c1273ce06cb87bfbc565c5f0ff23",
+      "hash_repo_sha256": "9c47b12b6427854567e108ddf5ffdb4ff5f74231f36a58873ceeadd4a085f79a",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "44_mediciones_c2_10000_5_5.sql": {
+      "path": "sql/modulos/mediciones/44_mediciones_c2_10000_5_5.sql",
+      "hash_fuente_sha256": "e1a0e9d0eaef41e3459ff10e1efc6614e0fd29977b9fd96199ef2fb89131f4fa",
+      "hash_repo_sha256": "47950a45bf65201de967cd5ab88d880271029eef63fb5e8482e51162bdcdb73f",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "45_mediciones_c2_100000_5_5.sql": {
+      "path": "sql/modulos/mediciones/45_mediciones_c2_100000_5_5.sql",
+      "hash_fuente_sha256": "e0230e5cfd457fef4fc967247d7cc2917d4ca502d66f3e03ff80a843646e4181",
+      "hash_repo_sha256": "9c08a244bfa0349e3d6beab42ae0abe3ea999424571af0215099433c1b7d6b0b",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "46_mediciones_c2_1000000_5_5.sql": {
+      "path": "sql/modulos/mediciones/46_mediciones_c2_1000000_5_5.sql",
+      "hash_fuente_sha256": "de45d427b906fd8b35c7dbe31b4a4d219e753bc27cb57a58237f534738e352a7",
+      "hash_repo_sha256": "0740a8f02e155cd6cc07be71814f0f99b958188585bdd8f78ccc21abf4fe99e4",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "47_mediciones_c3_1000_5_5.sql": {
+      "path": "sql/modulos/mediciones/47_mediciones_c3_1000_5_5.sql",
+      "hash_fuente_sha256": "ff5e620d8128aa031627231514cc0ff40885da58b54c4e2cb973d897453245b5",
+      "hash_repo_sha256": "96e7c71ef3bffbde9cee72b73c6b996ab8263200e3156437857a1aa1c8e51794",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "48_mediciones_c3_10000_5_5.sql": {
+      "path": "sql/modulos/mediciones/48_mediciones_c3_10000_5_5.sql",
+      "hash_fuente_sha256": "c8e9f3b9b2484918fc15809bcd1c524da2efba750351a5453127715d8b349782",
+      "hash_repo_sha256": "a501a9725e63c5dad6437d32ed136895cdc34af4fdd68516ac53facdabffca54",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "49_mediciones_c3_100000_5_5.sql": {
+      "path": "sql/modulos/mediciones/49_mediciones_c3_100000_5_5.sql",
+      "hash_fuente_sha256": "dbaf64a394fb729e2b3a2a8713a4f4861ea96af6fa1f1bf7922b66b9b6d148c0",
+      "hash_repo_sha256": "855c8cf655ac74e3802c67f6f27335a53d5a4710f433e23400a47fd472dd0e42",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "50_mediciones_c3_1000000_5_5.sql": {
+      "path": "sql/modulos/mediciones/50_mediciones_c3_1000000_5_5.sql",
+      "hash_fuente_sha256": "630582c44122af05cfb1828dc448df9e0ea6e2f851abd20c08414f043696ff1b",
+      "hash_repo_sha256": "6c25577dd6fc67256c569ab557df1efd3d9b9b5048f01f1fd7c34633869d5ce5",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "51_mediciones_c4_1000_5_5.sql": {
+      "path": "sql/modulos/mediciones/51_mediciones_c4_1000_5_5.sql",
+      "hash_fuente_sha256": "c3466100b6ee969bfd90d31153b466b14f8d53d37ba94cef821d90f565caf71a",
+      "hash_repo_sha256": "9ff884e322c62bbe8616631eb794397274de34b48d361d3e81ce74c3d4ef9809",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "52_mediciones_c4_10000_5_5.sql": {
+      "path": "sql/modulos/mediciones/52_mediciones_c4_10000_5_5.sql",
+      "hash_fuente_sha256": "183c2f30666be0cef60ce834161b778a286975388fb82f28e097bf5f0132e94a",
+      "hash_repo_sha256": "06795ad78496c9338d4cf63b97448b6783810540a6bf13ab4f267e49d713b1ba",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "53_mediciones_c4_100000_5_5.sql": {
+      "path": "sql/modulos/mediciones/53_mediciones_c4_100000_5_5.sql",
+      "hash_fuente_sha256": "d6e7710aab9fffa99ae7cb6fbe81fbf34b6f1dfba5539188c18450bfbd8e5cce",
+      "hash_repo_sha256": "ebeff4b209f40492b530d34b7a3c5343a6192e746717d22e4a9a9ebc6ed159ba",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "54_mediciones_c4_1000000_5_5.sql": {
+      "path": "sql/modulos/mediciones/54_mediciones_c4_1000000_5_5.sql",
+      "hash_fuente_sha256": "b8707ae17a6fe89800fbe1e7e77708ad072054eaa7efa8dfe26c9c83e1c810dd",
+      "hash_repo_sha256": "6cc88986edef6e04738468cbedba2137ca44031aca96e2a926a0e6dc1499277d",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "55_mediciones_c5_1000_5_5.sql": {
+      "path": "sql/modulos/mediciones/55_mediciones_c5_1000_5_5.sql",
+      "hash_fuente_sha256": "14bafdc51de3b3e10361374525f062d1e9c5c46e176aef19455bf2d429f662db",
+      "hash_repo_sha256": "1a184c019a0784175a5e335b5be8c1f8afff66057993c61bb7d663a93371e6d2",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "56_mediciones_c5_10000_5_5.sql": {
+      "path": "sql/modulos/mediciones/56_mediciones_c5_10000_5_5.sql",
+      "hash_fuente_sha256": "861b1e1d3285e1d8721c7dc1235129e8b7f1756255197cb2003fec2990a94ea0",
+      "hash_repo_sha256": "75ba9f2619d8dc34dc1230da311fa77b867e84a689934f8c507993bedfc0ac2c",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "57_mediciones_c5_100000_5_5.sql": {
+      "path": "sql/modulos/mediciones/57_mediciones_c5_100000_5_5.sql",
+      "hash_fuente_sha256": "18d1689e674a83325ce93dda01d815b97f8548944506ff770f2cc11a9b7468b1",
+      "hash_repo_sha256": "9f58ac14aff8bb2e398d97706e3eaa615f8ef37a082585b2414310e8a9d0cc55",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "58_mediciones_c5_1000000_5_5.sql": {
+      "path": "sql/modulos/mediciones/58_mediciones_c5_1000000_5_5.sql",
+      "hash_fuente_sha256": "6305df0056e0cb6a3e103d46dbc9d2befb7a1b91425a59e22b8e3baaf42f0f2c",
+      "hash_repo_sha256": "991ff3750fbaec2cf23f5e05b14c264db18513cbfca83e2ffe5f25ed4e281123",
+      "ajustes_no_funcionales": [
+        "Ruta local de importacion/exportacion a ruta relativa sql/datos o sql/resultados."
+      ]
+    },
+    "61_verificar_restauracion_1000.sql": {
+      "path": "sql/modulos/verificacion/61_verificar_restauracion_1000.sql",
+      "hash_fuente_sha256": "54a18c173ecb4dc7be99f908f49fe4645c0467e26df9df2ba713865e752ee357",
+      "hash_repo_sha256": "54a18c173ecb4dc7be99f908f49fe4645c0467e26df9df2ba713865e752ee357",
+      "ajustes_no_funcionales": []
+    },
+    "62_demostracion_video_1000000.sql": {
+      "path": "sql/modulos/demostracion/62_demostracion_video_1000000.sql",
+      "hash_fuente_sha256": "23d0c7805546634bf3ebbefb6b1b9702f64690648193c007f8f30c1103672a20",
+      "hash_repo_sha256": "23d0c7805546634bf3ebbefb6b1b9702f64690648193c007f8f30c1103672a20",
+      "ajustes_no_funcionales": []
+    },
+    "20_exportar_dumps_5_2.ps1": {
+      "path": "herramientas/01_exportar_dumps.ps1",
+      "hash_fuente_sha256": "70995dbad57c3ae0a71db0f5381a67425f8b130e92919228b4b7f58b0a276e8e",
+      "hash_repo_sha256": "9a625d6198d3fb8430f5131df964b386dcdca58e7d33db83f2412d3d48ab4784",
+      "ajustes_no_funcionales": [
+        "Destino de dumps portatil con PSScriptRoot."
+      ]
+    },
+    "37_equipo_plataforma_5_4.ps1": {
+      "path": "herramientas/02_diagnostico_equipo.ps1",
+      "hash_fuente_sha256": "54348feb888e55db64dc60f03357cf323992064ef2e61574b4d1ff554c4ff252",
+      "hash_repo_sha256": "54348feb888e55db64dc60f03357cf323992064ef2e61574b4d1ff554c4ff252",
+      "ajustes_no_funcionales": []
+    },
+    "60_probar_restauracion_dump_5_7.ps1": {
+      "path": "herramientas/03_probar_restauracion.ps1",
+      "hash_fuente_sha256": "6bb9bb209d2307c553e5f3b21835733473dbad7a7e586c853433fde00ba472b5",
+      "hash_repo_sha256": "6dfce190822190aca9676c6c5533c832a2e4454184026499f934bf42d367e02e",
+      "ajustes_no_funcionales": [
+        "Ruta a dumps y script verificador calculada desde carpeta repo."
+      ]
+    }
+  },
+  "igp_archivo_oficial_incluido": false,
+  "dumps_incluidos": false,
+  "mediciones_originales_csv_incluidos": false,
+  "integradores_creados": [
+    "sql/01_estructura.sql",
+    "sql/02_datos.sql",
+    "sql/03_logica_consultas.sql",
+    "sql/04_bases_experimentales.sql",
+    "sql/05_planes_indices.sql",
+    "sql/06_mediciones.sql",
+    "sql/07_demostracion_video.sql"
+  ],
+  "estado": "Preparado estructuralmente. Integradores nuevos requieren pruebas sobre bases frescas."
+}

@@ -1,0 +1,36 @@
+# Secretos y variables de entorno
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pgpass
+pgpass.conf
+*.pem
+*.key
+# Dependencias y compilaciones
+**/node_modules/
+**/dist/
+**/.cache/
+__pycache__/
+*.py[cod]
+# TeXstudio, LaTeX y auxiliares
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+# Respaldo PostgreSQL, evitar objetos grandes en Git
+*.dump
+*.backup
+*.sql.gz
+# El CSV fuente IGP se descarga del portal oficial
+sql/datos/igp_catalogo.csv
+# Archivos de SO/IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

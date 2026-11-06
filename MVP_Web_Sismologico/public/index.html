@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="description" content="Panel de monitoreo sismológico, consultas SQL y reportes PostgreSQL."/>
+<title>Observatorio | Monitoreo Sismológico</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="/styles.css"/>
+<script src="/app.js" defer></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brandmark">∿</div><div><strong>OBSERVATORIO</strong><small>Monitoreo sismológico</small></div></div>
+    <div class="workspace"><span class="eyebrow">PROYECTO FINAL · CS2041</span><span class="workspace-title">Panel de análisis</span><span class="workspace-sub">PostgreSQL · UTEC 2026-2</span></div>
+    <nav class="nav" aria-label="Consultas del proyecto"><div class="nav-title">CONSULTAS SQL</div><div id="queryNav"></div></nav>
+    <div class="sidebar-footer"><span class="dot"></span> <span>Modo seguro: solo lectura</span><small>Cinco consultas originales</small></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div class="breadcrumb">Proyecto Final <span>/</span> <b id="breadcrumbTitle">Resumen</b></div><div class="topright"><span id="dbIndicator" class="server-pill"><i></i><span>Conectando...</span></span><span class="avatar">BD</span></div></header>
+    <div class="content">
+      <section class="hero"><div><div class="kicker"><span class="kicker-line"></span> PLATAFORMA DE MONITOREO</div><h1>Inteligencia <em>sismológica.</em></h1><p>Explora eventos, estaciones, calidad de lecturas, alertas y detecciones desde PostgreSQL en tiempo real.</p></div><div class="hero-pattern" aria-hidden="true"><svg viewBox="0 0 400 160" preserveAspectRatio="none"><path d="M0 80H35L48 78L60 103L73 51L87 96L96 80H135L148 86L164 68L175 82L189 79H231L243 72L256 87L268 48L278 112L292 79H333L345 91L354 66L365 82H400" fill="none" stroke="currentColor" stroke-width="2"/></svg></div></section>
+      <section class="overview"><div class="sectionline"><h2>Visión general</h2><span class="minor" id="databaseName">Base de datos</span></div><div class="cards"><article class="metric"><div class="metric-icon">▦</div><div class="metric-label">Registros totales</div><div id="metricTotal" class="metric-value">—</div><div class="metric-foot">Seis tablas relacionadas</div></article><article class="metric"><div class="metric-icon">◈</div><div class="metric-label">Eventos del IGP</div><div id="metricIGP" class="metric-value">—</div><div class="metric-foot">Registros de origen oficial</div></article><article class="metric"><div class="metric-icon">⌁</div><div class="metric-label">Lecturas de onda</div><div id="metricReadings" class="metric-value">—</div><div class="metric-foot">Telemetría almacenada</div></article><article class="metric"><div class="metric-icon">◎</div><div class="metric-label">Sensores</div><div id="metricSensors" class="metric-value">—</div><div class="metric-foot">Equipos del sistema</div></article></div></section>
+      <section class="query-section"><div class="sectionline sectionline-query"><div><div class="mini-label" id="queryCode">CONSULTA C1</div><h2 id="queryTitle">Actividad sísmica anual</h2><p id="queryDescription" class="description">Sismos oficiales del catálogo IGP.</p></div><button id="runButton" class="primary" type="button"><span>↻</span> Ejecutar consulta</button></div>
+        <div class="query-stats"><div><span class="sm-label">Estado</span><span class="value ready" id="runStatus">Pendiente</span></div><div><span class="sm-label">Filas</span><span class="value" id="runRows">—</span></div><div><span class="sm-label">Respuesta del servidor</span><span class="value" id="runTime">—</span></div><div><span class="sm-label">Conexión</span><span class="value">PostgreSQL · READ ONLY</span></div></div>
+        <div class="result-layout"><article class="visual-card"><div class="cardhead"><div><span class="mini-label">VISUALIZACIÓN</span><h3 id="chartTitle">Distribución de resultados</h3></div><span class="hint">Datos de la consulta seleccionada</span></div><div id="chart" class="chart-bars"><div class="empty">Ejecuta una consulta para visualizar los resultados.</div></div></article>
+        <article class="data-card"><div class="cardhead"><div><span class="mini-label">DATOS TABULARES</span><h3>Resultados de la consulta</h3></div><button id="downloadCsv" class="secondary" type="button" disabled>↓ Exportar CSV</button></div><div class="tabletools"><label class="searchwrap"><span>⌕</span><input id="tableSearch" type="search" placeholder="Filtrar los resultados visibles..." aria-label="Filtrar resultados"/></label><span id="tableCount" class="hint">0 filas</span></div><div class="table-scroll"><table><thead id="tableHead"></thead><tbody id="tableBody"><tr><td>Selecciona una consulta para comenzar.</td></tr></tbody></table></div></article></div>
+      </section>
+      <footer class="footer"><span>Proyecto Final · Base de Datos I · UTEC</span><span>Los resultados son académicos. Los registros simulados no representan observaciones reales.</span></footer>
+    </div>
+  </main>
+</div>
+</body>
+</html>

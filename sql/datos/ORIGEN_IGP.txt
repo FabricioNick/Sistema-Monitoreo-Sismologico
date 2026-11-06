@@ -1,0 +1,9 @@
+CATALOGO SISMICO IGP — ARCHIVO FUENTE NO INCLUIDO
+
+Para ejecutar las etapas 2 y 4:
+1. Obtenga el CSV original verificado del portal de Datos Abiertos del Peru / IGP.
+   https://www.datosabiertos.gob.pe/dataset/catalogo-sismico/resource/f9629081-0721-4101-a2c2-d0622e046f8b
+2. Guarde el archivo como: sql/datos/igp_catalogo.csv
+3. Mantenga el separador ';' y los encabezados que esperan los scripts.
+4. Los scripts reproducen la importacion de 24289 registros verificados en 2026.
+No se distribuye un CSV simulado como si fuera el oficial.
