@@ -1,0 +1,15 @@
+consulta,escala,escenario,repeticion,fase,execution_ms,planning_ms,shared_hit,shared_read,temp_read,temp_written,uso_indice_1,uso_indice_2,filas_resultado,firma_resultados
+C3,1000,sin_indice,1,calentamiento,0.636,0.190,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,sin_indice,2,calentamiento,0.639,0.183,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,sin_indice,3,medicion,0.649,0.156,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,sin_indice,4,medicion,0.617,0.146,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,sin_indice,5,medicion,0.611,0.154,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,sin_indice,6,medicion,0.614,0.156,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,sin_indice,7,medicion,0.609,0.142,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,con_indice,1,calentamiento,0.602,0.169,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,con_indice,2,calentamiento,0.607,0.165,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,con_indice,3,medicion,0.656,0.153,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,con_indice,4,medicion,0.570,0.152,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,con_indice,5,medicion,0.592,0.154,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,con_indice,6,medicion,0.563,0.159,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
+C3,1000,con_indice,7,medicion,0.569,0.147,8,0,0,0,f,f,5,3f4c63288b75a1c0d43bd271461f0db1
