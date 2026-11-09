@@ -43,7 +43,7 @@ BEGIN
         WHERE table_schema = 'monitoreo_sismologico'
           AND table_name = 'evento_sismico'
     ) THEN
-        RAISE EXCEPTION 'La base % ya tiene tablas. No volver a generar sin auditar.', current_database();
+        RAISE EXCEPTION 'La base % contiene tablas y no admite una nueva generacion.', current_database();
     END IF;
 END;
 $$;

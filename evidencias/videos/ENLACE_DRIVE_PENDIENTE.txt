@@ -1,5 +1,0 @@
-VIDEOS — Google Drive (enlace pendiente)
-
-Esta carpeta solo documenta el enlace de videos del proyecto.
-No agregar una URL hasta que el video obligatorio haya sido grabado y compartido.
-El video debe mostrar la comparacion con/sin indices sobre 1000000 de registros.

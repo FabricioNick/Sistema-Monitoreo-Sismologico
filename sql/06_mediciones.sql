@@ -1,6 +1,5 @@
 -- 06. MEDICIONES
 -- Dos calentamientos y cinco mediciones por escenario.
--- Seleccionar consulta y escala en psql antes de ejecutar.
 
 \set ON_ERROR_STOP on
 \pset pager off

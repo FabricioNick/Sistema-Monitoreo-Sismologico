@@ -1,13 +1,7 @@
--- 62. Demostracion audiovisual de planes C1-C5 / 1 000 000 registros.
--- Reproduce LAS MISMAS consultas que los archivos 42, 46, 50, 54 y 58.
--- NO es la serie estadistica; solo muestra UN EXPLAIN por condicion.
--- REQUIERE que la base conserve solo los dos indices experimentales C5
--- dejados por el archivo 58, ademas de PK/UNIQUE.
--- IMPORTANTE: indices transitorios dentro de una sola transaccion;
--- ROLLBACK final RESTAURA exactamente el estado de los indices al iniciar.
--- No modifica tablas, datos, restricciones, triggers ni respaldos .dump.
--- En caso de error: escribir ROLLBACK; en la misma sesion psql.
--- Ejecutar UNA SOLA VEZ para la grabacion de video.
+-- 62. Comparacion de planes C1-C5 para un millon de registros.
+-- Consultas equivalentes a las empleadas en las mediciones experimentales.
+-- Una ejecucion ilustrativa por condicion, sin reemplazar las series de medicion.
+-- Los cambios transitorios de indices se revierten mediante ROLLBACK.
 
 \set ON_ERROR_STOP on
 \pset pager off
@@ -36,7 +30,7 @@ BEGIN
   END IF;
   IF to_regclass('monitoreo_sismologico.idx_lectura_sensor_hora_c5') IS NULL
      OR to_regclass('monitoreo_sismologico.idx_det_sensor_hora_c5') IS NULL THEN
-    RAISE EXCEPTION 'Faltan indices C5: confirmar el estado tras el archivo 58';
+    RAISE EXCEPTION 'No se cumple la condicion inicial de los indices experimentales C5';
   END IF;
   IF EXISTS (
     SELECT 1 FROM pg_index i

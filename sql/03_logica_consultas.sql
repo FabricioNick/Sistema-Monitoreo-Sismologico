@@ -278,7 +278,6 @@ $$;
 
 
 \echo '=== PROCEDIMIENTOS ==='
--- Se puede ejecutar nuevamente con CREATE OR REPLACE PROCEDURE.
 BEGIN;
 SET LOCAL search_path TO monitoreo_sismologico, public;
 
@@ -555,7 +554,7 @@ BEGIN
        OR (SELECT COUNT(*) FROM lectura_onda) <> 1190
        OR (SELECT COUNT(*) FROM deteccion) <> 104
        OR (SELECT COUNT(*) FROM alerta) <> 29 THEN
-        RAISE EXCEPTION 'Los recuentos de la base no coinciden con la auditoria anterior';
+        RAISE EXCEPTION 'Los recuentos de la base difieren de la distribucion esperada';
     END IF;
 
     IF EXISTS (SELECT 1 FROM estacion_sismica WHERE id_estacion = 930450001)
@@ -716,7 +715,6 @@ ORDER BY control;
 
 
 \echo '=== TRIGGERS ==='
--- PostgreSQL 18. Ejecutar con psql en bd_sismologico.
 -- No inserta, modifica ni borra registros de las seis tablas base.
 BEGIN;
 SET LOCAL search_path TO monitoreo_sismologico, public;

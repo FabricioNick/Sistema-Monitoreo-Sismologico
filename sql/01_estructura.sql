@@ -5,7 +5,6 @@
 \echo '=== ESTRUCTURA: VALIDACION DE BASE ==='
 SELECT current_database() AS base_actual;
 
--- Ejecutar solo en una base nueva y vacia.
 DO $$
 BEGIN
     IF current_database() IN ('postgres', 'template0', 'template1') THEN

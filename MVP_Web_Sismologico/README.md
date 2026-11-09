@@ -38,6 +38,27 @@ Puedes ejecutar las pruebas unitarias sin PostgreSQL mediante `npm test` (las re
 
 No ejecutes los archivos de optimización 21–58 para usar el MVP. El MVP consulta el estado real de la base ya creada. Si la conexión falla, comprueba `.env`, el servicio de PostgreSQL y el nombre de la base.
 
+
+## Interfaz renovada
+
+Al abrir la aplicación aparece una pantalla de bienvenida con una señal sísmica
+animada. Usa **Entrar al observatorio** para acceder al panel.
+
+- El botón lateral superior contrae o expande el menú en escritorio.
+- En pantallas pequeñas, abre un menú deslizable; puedes cerrarlo tocando fuera o pulsando Escape.
+- El botón con la casa permite volver a la bienvenida sin detener el servidor.
+- Las tarjetas muestran los recuentos consultados de PostgreSQL, no valores prefijados.
+- Conserva las consultas C1–C5, sus visualizaciones, tablas, filtros y exportación CSV.
+- La señal del encabezado es decorativa, no telemetría sísmica en vivo.
+- La animación respeta la preferencia del sistema de reducir movimiento.
+
+Si ya tienes la base y `.env` configurados, también puedes ejecutar
+**`INICIAR_MVP.cmd`** con doble clic para abrir el MVP local. La ventana del
+servidor debe permanecer abierta mientras lo uses.
+
+**Actualización:** el ZIP no incluye `.env` ni contraseñas. Al extraer sobre la
+carpeta existente, conserva el `.env` que ya configuraste.
+
 ## API
 
 - `GET /api/health`: confirma conexión y versión de PostgreSQL.

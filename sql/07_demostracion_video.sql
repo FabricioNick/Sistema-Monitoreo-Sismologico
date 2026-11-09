@@ -1,6 +1,5 @@
--- ETAPA 7 - Demostracion reversible del millon (C1-C5)
--- PSQL: ejecutar desde la carpeta sql/; NO desde pgAdmin Query Tool.
--- REQUIERE base exp_1000000 al terminar la etapa 6 con indices C5. El script 62 hace ROLLBACK para dejar indices intactos.
+-- 07. Demostracion de las consultas C1-C5 con un millon de registros.
+-- Control de condiciones y restablecimiento mediante ROLLBACK.
 \set ON_ERROR_STOP on
 \pset pager off
 \connect bd_sismologico_exp_1000000
