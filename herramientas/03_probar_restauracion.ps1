@@ -3,7 +3,7 @@
 $ErrorActionPreference = 'Stop'
 $baseDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'sql'
 $dump = Join-Path $baseDir 'Dumps\bd_sismologico_exp_1000.dump'
-$check = Join-Path $baseDir 'modulos\verificacion\61_verificar_restauracion_1000.sql'
+$check = Join-Path $PSScriptRoot '61_verificar_restauracion_1000.sql'
 $destino = 'bd_sismologico_restauracion_1000'
 $bin = 'D:\Aplicaciones\PostgreSQL\18\bin'
 $runtime = 'D:\Aplicaciones\PostgreSQL\18\pgAdmin 4\runtime'
