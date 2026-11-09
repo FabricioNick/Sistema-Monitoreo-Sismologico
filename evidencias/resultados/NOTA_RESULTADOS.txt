@@ -1,4 +1,0 @@
-La carpeta incluye el resumen global verificado y una exportacion real del MVP.
-Para una auditoria integral, agregar los archivos 38-58_resultados_*.csv que se
-exportaron en el equipo Windows durante las pruebas. No estaban en los materiales
-recibidos al preparar este repositorio; NO han sido reconstruidos artificialmente.

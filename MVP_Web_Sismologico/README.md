@@ -1,86 +1,67 @@
-# MVP web — Monitoreo Sismológico y Alerta Temprana
+# MVP web — Monitoreo Sismológico
 
-Aplicación web para el extra de **+2 puntos** de CS2041 (sujeto a la evaluación del profesor). Conecta mediante Node.js y el controlador `pg` a la base PostgreSQL existente y ejecuta las **cinco consultas originales** del archivo `15_consultas_5_1.sql` sin modificar sus predicados.
+Aplicación local de consulta para el proyecto **CS2041 — Base de Datos I**. El servidor utiliza Node.js y el controlador `pg` para conectar con PostgreSQL y ejecutar las cinco consultas C1–C5 en modo de solo lectura.
 
 ## Requisitos
 
-- Windows 11 y Node.js 22 o superior (tu instalación Node 24 es compatible).
-- PostgreSQL 18 encendido y disponible en `127.0.0.1:5432`.
-- La base `bd_sismologico_exp_1000000` o `bd_sismologico` con el esquema `monitoreo_sismologico` y sus seis tablas.
-- Acceso local a npm para instalar una sola dependencia: `pg`.
+- Node.js 22 o superior y npm.
+- PostgreSQL 18 con la base experimental y el esquema `monitoreo_sismologico` ya preparados.
+- Configuración local de conexión mediante un archivo `.env` no versionado.
 
-## Instalación en Windows — CMD
+## Instalación
 
-1. Extrae el ZIP en tu carpeta `Proyecto_Final` (quedará `Proyecto_Final\MVP_Web_Sismologico`).
-2. Abre **CMD** dentro de `MVP_Web_Sismologico`.
-3. Ejecuta:
+Desde la carpeta `MVP_Web_Sismologico` del repositorio, ejecutar:
 
 ```cmd
 copy .env.example .env
 notepad .env
-npm install
+npm ci
 npm start
 ```
 
-4. En `.env` reemplaza **solamente** `PGPASSWORD=REEMPLAZAR_CON_TU_CONTRASENA` por la contraseña local. No compartas ese archivo ni lo subas a GitHub. Guarda y cierra el Bloc de notas antes de `npm start`.
-5. Abre `http://127.0.0.1:3000` en el navegador. Usa el selector lateral para ejecutar C1, C2, C3, C4 o C5.
-6. Verifica el panel, la tabla, la búsqueda local, los encabezados ordenables y el botón para exportar CSV.
+En `.env`, configurar la conexión a PostgreSQL, especialmente `PGPASSWORD` y `PGDATABASE`, con los valores del entorno local. **No publicar el archivo `.env` ni las credenciales.**
 
-Para verificar automáticamente los resultados, **mantén `npm start` abierto** y ejecuta en una segunda ventana CMD:
+Abrir `http://127.0.0.1:3000` en el navegador. En Windows también puede utilizarse `INICIAR_MVP.cmd` si la instalación y la conexión ya están configuradas.
+
+## Funcionalidades
+
+- Pantalla de bienvenida y panel de monitoreo.
+- Resumen de registros consultado directamente desde PostgreSQL.
+- Ejecución de las consultas C1, C2, C3, C4 y C5.
+- Resultados tabulares, búsqueda, ordenamiento y exportación CSV.
+- Visualizaciones informativas y diseño adaptable a diferentes pantallas.
+
+La animación de la señal sísmica es **decorativa**, no una transmisión instrumental en tiempo real.
+
+## API
+
+| Endpoint | Función |
+|---|---|
+| `GET /api/health` | Estado de la conexión |
+| `GET /api/overview` | Recuentos generales |
+| `GET /api/queries` | Catálogo de consultas |
+| `GET /api/queries/C1` a `C5` | Ejecución de las cinco consultas originales |
+
+La implementación SQL de referencia se conserva en [`SQL_ORIGINAL_15_consultas_5_1.sql`](SQL_ORIGINAL_15_consultas_5_1.sql) y en los integradores de [`../sql/`](../sql/).
+
+## Pruebas
+
+Para ejecutar las pruebas automatizadas del servidor:
+
+```cmd
+npm test
+```
+
+Para comprobar la conexión y las cinco consultas sobre una base experimental de un millón de registros, iniciar el servidor y ejecutar en otra consola:
 
 ```cmd
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "63_verificar_mvp_web.ps1"
 ```
 
-El verificador comprueba que existan un millón de filas, 24 289 eventos IGP y que C1–C5 devuelvan el número de filas esperado. Si tu archivo `.env` apunta a una base diferente, el verificador avisará en lugar de aprobarla incorrectamente.
+Esta segunda comprobación está diseñada específicamente para la base experimental de un millón de registros y valida sus recuentos esperados; no es una prueba genérica para todas las bases.
 
-Puedes ejecutar las pruebas unitarias sin PostgreSQL mediante `npm test` (las respuestas del servidor se simulan únicamente en las pruebas automatizadas).
+## Seguridad y alcance
 
-No ejecutes los archivos de optimización 21–58 para usar el MVP. El MVP consulta el estado real de la base ya creada. Si la conexión falla, comprueba `.env`, el servicio de PostgreSQL y el nombre de la base.
+La contraseña permanece en el servidor local. Las operaciones de consulta utilizan transacciones de solo lectura; la interfaz no admite SQL arbitrario enviado por el navegador. La aplicación se ejecuta localmente y no constituye un servicio público de alerta temprana.
 
-
-## Interfaz renovada
-
-Al abrir la aplicación aparece una pantalla de bienvenida con una señal sísmica
-animada. Usa **Entrar al observatorio** para acceder al panel.
-
-- El botón lateral superior contrae o expande el menú en escritorio.
-- En pantallas pequeñas, abre un menú deslizable; puedes cerrarlo tocando fuera o pulsando Escape.
-- El botón con la casa permite volver a la bienvenida sin detener el servidor.
-- Las tarjetas muestran los recuentos consultados de PostgreSQL, no valores prefijados.
-- Conserva las consultas C1–C5, sus visualizaciones, tablas, filtros y exportación CSV.
-- La señal del encabezado es decorativa, no telemetría sísmica en vivo.
-- La animación respeta la preferencia del sistema de reducir movimiento.
-
-Si ya tienes la base y `.env` configurados, también puedes ejecutar
-**`INICIAR_MVP.cmd`** con doble clic para abrir el MVP local. La ventana del
-servidor debe permanecer abierta mientras lo uses.
-
-**Actualización:** el ZIP no incluye `.env` ni contraseñas. Al extraer sobre la
-carpeta existente, conserva el `.env` que ya configuraste.
-
-## API
-
-- `GET /api/health`: confirma conexión y versión de PostgreSQL.
-- `GET /api/overview`: suma filas de las seis tablas y cuenta eventos IGP/simulados por identificador.
-- `GET /api/queries`: nombres y descripciones de las cinco consultas.
-- `GET /api/queries/C1` ... `C5`: **SQL original**, resultados y tiempo total del servicio.
-
-## Alcance y seguridad
-
-- `PGPASSWORD` reside en el servidor local; **no** se envía al navegador.
-- No se aceptan instrucciones SQL libres, nombres de tablas arbitrarios ni parámetros del usuario interpolados en SQL.
-- Cada acceso a la base ocurre en una transacción `BEGIN READ ONLY` y `ROLLBACK` con `statement_timeout=30s`.
-- Acceso HTTP limitado a `127.0.0.1`, para una demostración en el mismo equipo. No incluye inicio de sesión ni despliegue público.
-- El filtrado y ordenamiento de tablas en pantalla ocurre en el navegador y no modifica PostgreSQL.
-- `duration_ms` es el tiempo total medido en el servidor para el acceso a la consulta, **no es equivalente** al tiempo `Execution Time` de `EXPLAIN ANALYZE` ni reemplaza las mediciones del informe.
-
-## Verificación sugerida para evaluación
-
-1. Mostrar conexión exitosa y el total de **1 000 000** de filas.
-2. Ejecutar las cinco consultas desde la barra lateral y comprobar que devuelven resultados.
-3. Filtrar una tabla y exportar CSV.
-4. Explicar la arquitectura navegador → Node HTTP/`pg` → PostgreSQL 18.
-5. Mostrar que son consultas originales del proyecto y que el modo es solo lectura.
-
-**Estado:** código generado y comprobado estáticamente. La ejecución contra tu PostgreSQL local está **pendiente de tus pruebas**; no presentar capturas o conexiones ficticias como evidencia.
+Los tiempos HTTP del MVP no son directamente comparables con `Execution Time` de `EXPLAIN ANALYZE` utilizado en el informe experimental.

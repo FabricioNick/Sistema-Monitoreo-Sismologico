@@ -1,43 +1,58 @@
 # Sistema de Monitoreo Sismológico y Alerta Temprana
 
-**CS2041 · Base de Datos I · UTEC · 2026-2**
+Proyecto final de **Base de Datos I (CS2041)** — UTEC, 2026-2.
 
-Proyecto de base de datos relacional en PostgreSQL 18 para estaciones sísmicas, sensores, eventos, lecturas, detecciones y alertas. Combina un catálogo de 24 289 eventos oficiales del IGP con información operativa sintética, identificando su procedencia.
+Implementación de una base de datos relacional en PostgreSQL para el registro y consulta de estaciones sísmicas, sensores, eventos, lecturas, detecciones y alertas. El proyecto integra datos del catálogo oficial del Instituto Geofísico del Perú (IGP) y datos operativos simulados, diferenciando su procedencia.
 
-## Contenido
+## Documentación y entregables
 
-- `informe/`: informe LaTeX, PDF y figuras de evidencia.
-- `sql/`: siete integradores y módulos SQL de estructura, carga, lógica, experimentación y demostración.
-- `MVP_Web_Sismologico/`: prototipo web Node.js con acceso de solo lectura.
-- `evidencias/`: resultados, planes y material de verificación.
-- [Respaldos experimentales (v1.0.0)](https://github.com/FabricioNick/Sistema-Monitoreo-Sismologico/releases/tag/v1.0.0): cuatro archivos `.dump` de 1 000, 10 000, 100 000 y 1 000 000 registros.
-- [Evidencia audiovisual — Google Drive](https://drive.google.com/drive/folders/1gb3Di7rx0eWwd05cC3xbw3DJxhjgS2t4?usp=sharing): comparación de consultas en la escala de un millón de registros con y sin índices.
-
-## Integradores SQL
-
-| Integrador | Función |
+| Recurso | Contenido |
 |---|---|
-| `01_estructura.sql` | Esquema, tablas y restricciones |
-| `02_datos.sql` | Carga del IGP y datos de simulación |
-| `03_logica_consultas.sql` | Vistas, procedimientos, triggers y consultas C1–C5 |
-| `04_bases_experimentales.sql` | Cuatro escalas de datos |
-| `05_planes_indices.sql` | Análisis de planes e índices |
-| `06_mediciones.sql` | Mediciones experimentales y controles de resultados |
-| `07_demostracion_video.sql` | Ejecución ilustrativa en la escala de un millón |
+| [Informe final (PDF)](informe/Proyecto_Final.pdf) | Modelos, implementación, consultas, metodología, resultados, análisis y anexos |
+| [SQL](sql/) | Scripts de estructura, carga, vistas, procedimientos, triggers, consultas y experimentación |
+| [Resultados CSV](sql/resultados/) | Mediciones experimentales, consolidado de las veinte comparaciones y exportación del MVP |
+| [MVP web](MVP_Web_Sismologico/) | Aplicación local de solo lectura que ejecuta las cinco consultas SQL |
+| [Herramientas](herramientas/) | Utilidades para exportación, diagnóstico y restauración de respaldos |
+| [Respaldos experimentales](https://github.com/FabricioNick/Sistema-Monitoreo-Sismologico/releases/tag/v1.0.0) | Cuatro archivos `.dump` correspondientes a las cuatro escalas |
+| [Demostración audiovisual](https://drive.google.com/drive/folders/1gb3Di7rx0eWwd05cC3xbw3DJxhjgS2t4?usp=sharing) | Carpeta de Drive destinada a la comparación experimental sobre un millón de registros |
 
-Los integradores se utilizan con `psql` y tienen condiciones de ejecución específicas. Su orden numérico no significa que deban aplicarse en una base ya poblada sin revisar el estado de los datos y los índices. El integrador `07` utiliza el estado experimental C5 de la base de un millón y revierte los cambios temporales de índices con `ROLLBACK`.
+Las evidencias gráficas, tablas de resultados y planes de ejecución están en el informe PDF. En `sql/resultados/` se conservan el resumen histórico `59_resumen_global_5_6.csv` (serie principal), `C5_resultados_mvp.csv` (exportación del prototipo) y los CSV `06_C*.csv` (segunda ejecución experimental). Las series de medición son distintas y no se combinan.
 
-## Consultas y resultados
+## Experimento de optimización
 
-Las cinco consultas evalúan actividad sísmica anual (C1), ventanas geográficas (C2), calidad de lecturas (C3), detecciones y alertas (C4), y sensores con lecturas sin detecciones (C5). Las comparaciones se realizaron en cuatro escalas, con dos calentamientos y cinco mediciones por escenario. Los índices no mejoraron todas las consultas; el informe documenta tanto los beneficios como los resultados desfavorables.
+Se estudiaron cinco consultas no triviales (C1–C5) sobre cuatro escalas: **1 000, 10 000, 100 000 y 1 000 000 de registros**, comparando los escenarios sin y con índices secundarios.
 
-## Prototipo web
+- **C1:** actividad sísmica anual.
+- **C2:** eventos en ventanas geográficas.
+- **C3:** calidad de las lecturas por estación.
+- **C4:** primera detección y primera alerta por evento.
+- **C5:** sensores con lecturas y sin detecciones.
 
-El MVP emplea Node.js, PostgreSQL y el controlador `pg`. El archivo `.env` se configura localmente y no debe publicarse. La interfaz permite ejecutar C1–C5 en modo de solo lectura, visualizar resultados y exportar CSV. Consulte las instrucciones de `MVP_Web_Sismologico/README.md` y el apartado correspondiente del informe.
+La evaluación contempla índices seleccionados por consulta, planes de ejecución y mediciones repetidas. El informe diferencia las mejoras observadas de los escenarios en los que los índices no se utilizaron o no redujeron el tiempo de ejecución.
 
-## Fuentes
+## Implementación SQL
 
-- [Catálogo de datos sísmicos del IGP](https://censis.igp.gob.pe/repositorio/datos-sismicos)
-- [Documentación oficial de PostgreSQL](https://www.postgresql.org/docs/)
+Los archivos de entrada se encuentran en [`sql/`](sql/):
 
-Los registros sintéticos de prueba no representan observaciones instrumentales reales. Los tiempos medidos pertenecen al entorno y al protocolo descritos en el informe.
+| Archivo | Propósito |
+|---|---|
+| `01_estructura.sql` | Tablas y restricciones |
+| `02_datos.sql` | Carga de información y verificaciones |
+| `03_logica_consultas.sql` | Vistas, procedimientos, triggers y consultas |
+| `04_bases_experimentales.sql` | Escalas experimentales |
+| `05_planes_indices.sql` | Planes de ejecución e índices candidatos |
+| `06_mediciones.sql` | Medición de rendimiento |
+| `07_demostracion_video.sql` | Comparación demostrativa de C1–C5 en la escala mayor |
+
+Los integradores requieren PostgreSQL y `psql`; algunos presuponen datos e índices previamente preparados. No son scripts de inicialización idempotentes para ejecutar indiscriminadamente en una base ya poblada.
+
+## Aplicación web
+
+El [MVP web](MVP_Web_Sismologico/README.md) usa Node.js y `pg` para ejecutar C1–C5 sobre PostgreSQL en modo de solo lectura. Incluye resultados tabulares, filtros y exportación CSV. La configuración privada de conexión se mantiene fuera del control de versiones.
+
+## Fuentes de datos y alcance
+
+- [Catálogo sísmico del IGP](https://censis.igp.gob.pe/repositorio/datos-sismicos)
+- [Documentación de PostgreSQL](https://www.postgresql.org/docs/)
+
+Los datos sintéticos no deben interpretarse como observaciones instrumentales reales. Las conclusiones de rendimiento se limitan a los datos, al equipo y al protocolo de experimentación documentados en el informe.
