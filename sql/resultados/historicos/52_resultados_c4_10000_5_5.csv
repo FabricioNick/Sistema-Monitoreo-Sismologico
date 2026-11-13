@@ -1,0 +1,15 @@
+escenario,repeticion,fase,execution_ms,planning_ms,shared_hit,shared_read,temp_read,temp_written,uso_indice_deteccion,uso_indice_alerta,filas_resultado,detecciones_top15,alertas_top15,firma_resultados
+sin_indice,1,calentamiento,0.246,0.179,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+sin_indice,2,calentamiento,0.214,0.169,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+sin_indice,3,medicion,0.187,0.154,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+sin_indice,4,medicion,0.175,0.157,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+sin_indice,5,medicion,0.193,0.134,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+sin_indice,6,medicion,0.176,0.154,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+sin_indice,7,medicion,0.181,0.122,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+con_indice,1,calentamiento,0.198,0.145,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+con_indice,2,calentamiento,0.204,0.153,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+con_indice,3,medicion,0.211,0.165,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+con_indice,4,medicion,0.192,0.159,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+con_indice,5,medicion,0.183,0.171,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+con_indice,6,medicion,0.201,0.196,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8
+con_indice,7,medicion,0.179,0.165,11,0,0,0,f,f,15,75,15,86c23b75df76ccad49f884a004af36c8

@@ -1,0 +1,8 @@
+repeticion,fase,execution_ms,planning_ms,shared_hit,shared_read,temp_read,temp_written
+1,calentamiento,0.188,1.293,2,0,0,0
+2,calentamiento,0.135,0.155,2,0,0,0
+3,medicion,0.115,0.116,2,0,0,0
+4,medicion,0.112,0.102,2,0,0,0
+5,medicion,0.103,0.101,2,0,0,0
+6,medicion,0.108,0.102,2,0,0,0
+7,medicion,0.112,0.114,2,0,0,0

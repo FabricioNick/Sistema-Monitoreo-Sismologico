@@ -56,3 +56,9 @@ El [MVP web](MVP_Web_Sismologico/README.md) usa Node.js y `pg` para ejecutar C1�
 - [Documentación de PostgreSQL](https://www.postgresql.org/docs/)
 
 Los datos sintéticos no deben interpretarse como observaciones instrumentales reales. Las conclusiones de rendimiento se limitan a los datos, al equipo y al protocolo de experimentación documentados en el informe.
+
+## Evidencia de reproducibilidad
+
+- [CSV historicos de mediciones](sql/resultados/historicos/): 21 archivos originales que respaldan las 20 comparaciones de la serie principal.
+- [Verificacion de implementacion](herramientas/Verificacion_Implementacion.sql) y [salida de PostgreSQL](sql/resultados/Salida_Verificacion_Implementacion.txt): recuentos, objetos e integridad comprobados.
+- Las mediciones `06_C*.csv` corresponden a una segunda serie experimental independiente.

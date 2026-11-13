@@ -1,0 +1,15 @@
+escenario,repeticion,fase,execution_ms,planning_ms,shared_hit,shared_read,temp_read,temp_written,uso_indice_candidato
+sin_indice,1,calentamiento,0.273,0.403,737,0,0,0,f
+sin_indice,2,calentamiento,0.246,0.089,737,0,0,0,f
+sin_indice,3,medicion,0.225,0.057,737,0,0,0,f
+sin_indice,4,medicion,0.376,0.196,737,0,0,0,f
+sin_indice,5,medicion,0.223,0.152,737,0,0,0,f
+sin_indice,6,medicion,0.215,0.058,737,0,0,0,f
+sin_indice,7,medicion,0.215,0.050,737,0,0,0,f
+con_indice,1,calentamiento,0.111,0.227,1,1,0,0,t
+con_indice,2,calentamiento,0.066,0.104,2,0,0,0,t
+con_indice,3,medicion,0.102,0.117,2,0,0,0,t
+con_indice,4,medicion,0.065,0.113,2,0,0,0,t
+con_indice,5,medicion,0.059,0.121,2,0,0,0,t
+con_indice,6,medicion,0.055,0.092,2,0,0,0,t
+con_indice,7,medicion,0.054,0.085,2,0,0,0,t

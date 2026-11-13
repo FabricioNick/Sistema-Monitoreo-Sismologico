@@ -1,0 +1,15 @@
+escenario,repeticion,fase,execution_ms,planning_ms,shared_hit,shared_read,temp_read,temp_written,uso_indice_deteccion,uso_indice_alerta,filas_resultado,detecciones_top15,alertas_top15,firma_resultados
+sin_indice,1,calentamiento,0.477,0.262,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+sin_indice,2,calentamiento,0.517,0.260,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+sin_indice,3,medicion,0.501,0.247,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+sin_indice,4,medicion,0.532,0.962,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+sin_indice,5,medicion,0.524,0.265,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+sin_indice,6,medicion,0.481,0.232,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+sin_indice,7,medicion,0.494,0.269,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+con_indice,1,calentamiento,0.553,0.306,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+con_indice,2,calentamiento,0.499,0.283,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+con_indice,3,medicion,0.481,0.283,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+con_indice,4,medicion,0.511,0.260,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+con_indice,5,medicion,0.483,0.252,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+con_indice,6,medicion,0.522,0.310,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2
+con_indice,7,medicion,0.524,0.301,17,0,0,0,f,f,15,345,15,a50d9536fabf6e1bb46e46debff0a1e2

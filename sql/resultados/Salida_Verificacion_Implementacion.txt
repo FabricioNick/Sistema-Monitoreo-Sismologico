@@ -1,0 +1,90 @@
+Pager usage is off.
+================= VERIFICACION DE IMPLEMENTACION =================
+ base_verificada | usuario  |                           version_postgresql                            
+-----------------+----------+-------------------------------------------------------------------------
+ bd_sismologico  | postgres | PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+(1 row)
+
+BEGIN
+SET
+[1] Filas por relacion, luego total
+      tabla       | filas 
+------------------+-------
+ ALERTA           |    29
+ DETECCION        |   104
+ ESTACION_SISMICA |    15
+ EVENTO_SISMICO   | 24327
+ LECTURA_ONDA     |  1190
+ SENSOR           |    40
+(6 rows)
+
+ registros_totales 
+-------------------
+             25705
+(1 row)
+
+[2] Inventario de restricciones declarativas
+    tipo     | cantidad 
+-------------+----------
+ CHECK       |        8
+ FOREIGN KEY |        5
+ NOT NULL    |       36
+ PRIMARY KEY |        6
+ UNIQUE      |        3
+(5 rows)
+
+ columnas_not_null 
+-------------------
+                36
+(1 row)
+
+[3] Inventario de vistas, procedimientos y disparadores
+     objeto     | cantidad 
+----------------+----------
+ vistas         |        5
+ procedimientos |        6
+ disparadores   |        9
+(3 rows)
+
+          disparador           | diferible | inicialmente_diferido | estado 
+-------------------------------+-----------+-----------------------+--------
+ ct_estacion_sensor_alta       | t         | t                     | O
+ ct_estacion_sensor_baja       | t         | t                     | O
+ ct_estacion_sensor_traslado   | t         | t                     | O
+ trg_alerta_temporal           | f         | f                     | O
+ trg_bloquear_estacion_origen  | f         | f                     | O
+ trg_deteccion_valida          | f         | f                     | O
+ trg_lectura_operativa         | f         | f                     | O
+ trg_proteger_sustento_lectura | f         | f                     | O
+ trg_revisar_origen_evento     | f         | f                     | O
+(9 rows)
+
+[4] Procedencia oficial, datos simulados y validacion de lecturas
+ eventos_igp | eventos_sinteticos | total_eventos 
+-------------+--------------------+---------------
+       24289 |                 38 |         24327
+(1 row)
+
+ lecturas_validas | lecturas_invalidas | total_lecturas 
+------------------+--------------------+----------------
+             1113 |                 77 |           1190
+(1 row)
+
+[5] Pruebas de consistencia sin modificar datos
+ estaciones_sin_sensor | detecciones_sin_lectura_valida | alertas_antes_del_origen 
+-----------------------+--------------------------------+--------------------------
+                     0 |                              0 |                        0
+(1 row)
+
+[6] Cardinalidad de las cinco vistas
+         vista          | filas 
+------------------------+-------
+ vw_sensores_actividad  |    40
+ vw_estaciones_resumen  |    15
+ vw_alertas_detalle     |    29
+ vw_eventos_seguimiento | 24327
+ vw_igp_resumen_mensual |   771
+(5 rows)
+
+COMMIT
+Fin de la verificacion: no se modifico ninguna tabla.
