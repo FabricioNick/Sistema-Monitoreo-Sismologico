@@ -41,7 +41,7 @@ El conjunto definitivo incluye **25 comparaciones**, **250 mediciones útiles** 
 4. [`04_bases_experimentales.sql`](sql/04_bases_experimentales.sql) — escalas experimentales.
 5. [`05_planes_indices.sql`](sql/05_planes_indices.sql) — índices candidatos y planes.
 6. [`06_mediciones.sql`](sql/06_mediciones.sql) — mediciones y verificaciones.
-7. [`07_demostracion_video.sql`](sql/07_demostracion_video.sql) — ejecuciones demostrativas.
+7. [`07_verificacion_comparativa.sql`](sql/07_verificacion_comparativa.sql) — consultas e índices para comparar manualmente los planes en pgAdmin.
 
 ## Catálogo de datos y respaldos
 
@@ -55,7 +55,7 @@ El **MVP web** permite ejecutar C1–C5 en modo de solo lectura, consultar resul
 
 **Enlace temporal:** [Abrir Observatorio Sismológico](https://routing-writing-deprive.ngrok-free.dev). Solo funciona mientras el servidor local y el túnel estén activos.
 
-**Evidencia audiovisual:** [Carpeta de Google Drive](https://drive.google.com/drive/folders/1gb3Di7rx0eWwd05cC3xbw3DJxhjgS2t4?usp=sharing). Se contemplan cinco videos, uno por consulta C1–C5, con ejecución y comparación de planes **sin y con índices candidatos** sobre la base de **1 000 000 registros**.
+**Evidencia audiovisual:** [Carpeta de Google Drive](https://drive.google.com/drive/folders/1gb3Di7rx0eWwd05cC3xbw3DJxhjgS2t4?usp=sharing). Se contemplan cinco videos independientes, uno por consulta C1–C5, con ejecución manual en **pgAdmin 4** y comparación de planes **sin y con índices candidatos** sobre la base de **1 000 000 registros**.
 
 ## Alcance
 
