@@ -1,4 +1,4 @@
-# Secretos y variables de entorno
+# Credenciales y datos privados
 .env
 .env.*
 !.env.example
@@ -15,7 +15,7 @@ pgpass.conf
 **/.cache/
 __pycache__/
 *.py[cod]
-# TeXstudio, LaTeX y auxiliares
+# Auxiliares LaTeX
 *.aux
 *.log
 *.out
@@ -23,13 +23,16 @@ __pycache__/
 *.synctex.gz
 *.fls
 *.fdb_latexmk
-# Respaldo PostgreSQL, evitar objetos grandes en Git
+*.listing
+# Respaldos de bases potencialmente grandes
 *.dump
 *.backup
 *.sql.gz
-# El CSV fuente IGP se descarga del portal oficial
-sql/datos/igp_catalogo.csv
-# Archivos de SO/IDE
+# Log de experimento: conservar únicamente logs verificados y públicos
+!resultados/registros_ejecucion/**/*.log
+# CSV público fuente del experimento: se incluye deliberadamente
+!sql/datos/igp_catalogo.csv
+# Sistema/IDE
 .DS_Store
 Thumbs.db
 .vscode/

@@ -1,0 +1,366 @@
+Pager usage is off.
+Timing is off.
+ escala_valida 
+---------------
+             1
+(1 row)
+
+You are now connected to database "bd_sismologico_prueba_exp_1000000" as user "postgres".
+=== DEMOSTRACION DE CONSULTA C1 ===
+ consulta_seleccionada | escala  
+-----------------------+---------
+ 1                     | 1000000
+(1 row)
+
+psql:../sql/07_demostracion_video.sql:71: NOTICE:  OK: escala 1000000, 24289 eventos IGP, sin indices secundarios
+DO
+=== COMPARACION DE PLANES ===
+BEGIN
+SET
+CREATE TABLE
+DO
+=== RESULTADOS DE LA CONSULTA ===
+ escenario  | filas_resultado |                  muestra                  
+------------+-----------------+-------------------------------------------
+ SIN INDICE |              15 | [                                        +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2010,                +
+            |                 |         "magnitud_maxima": 6.6,          +
+            |                 |         "cantidad_eventos": 7,           +
+            |                 |         "magnitud_promedio": 6.29,       +
+            |                 |         "profundidad_promedio_km": 184.29+
+            |                 |     },                                   +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2011,                +
+            |                 |         "magnitud_maxima": 7,            +
+            |                 |         "cantidad_eventos": 5,           +
+            |                 |         "magnitud_promedio": 6.56,       +
+            |                 |         "profundidad_promedio_km": 88.40 +
+            |                 |     },                                   +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2012,                +
+            |                 |         "magnitud_maxima": 6.4,          +
+            |                 |         "cantidad_eventos": 8,           +
+            |                 |         "magnitud_promedio": 6.20,       +
+            |                 |         "profundidad_promedio_km": 102.75+
+            |                 |     },                                   +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2013,                +
+            |                 |         "magnitud_maxima": 7.1,          +
+            |                 |         "cantidad_eventos": 4,           +
+            |                 |         "magnitud_promedio": 6.38,       +
+            |                 |         "profundidad_promedio_km": 44.50 +
+            |                 |     },                                   +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2014,                +
+            |                 |         "magnitud_maxima": 6.9,          +
+            |                 |         "cantidad_eventos": 6,           +
+            |                 |         "magnitud_promedio": 6.30,       +
+            |                 |         "profundidad_promedio_km": 62.33 +
+            |                 |     }                                    +
+            |                 | ]
+ CON INDICE |              15 | [                                        +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2010,                +
+            |                 |         "magnitud_maxima": 6.6,          +
+            |                 |         "cantidad_eventos": 7,           +
+            |                 |         "magnitud_promedio": 6.29,       +
+            |                 |         "profundidad_promedio_km": 184.29+
+            |                 |     },                                   +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2011,                +
+            |                 |         "magnitud_maxima": 7,            +
+            |                 |         "cantidad_eventos": 5,           +
+            |                 |         "magnitud_promedio": 6.56,       +
+            |                 |         "profundidad_promedio_km": 88.40 +
+            |                 |     },                                   +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2012,                +
+            |                 |         "magnitud_maxima": 6.4,          +
+            |                 |         "cantidad_eventos": 8,           +
+            |                 |         "magnitud_promedio": 6.20,       +
+            |                 |         "profundidad_promedio_km": 102.75+
+            |                 |     },                                   +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2013,                +
+            |                 |         "magnitud_maxima": 7.1,          +
+            |                 |         "cantidad_eventos": 4,           +
+            |                 |         "magnitud_promedio": 6.38,       +
+            |                 |         "profundidad_promedio_km": 44.50 +
+            |                 |     },                                   +
+            |                 |     {                                    +
+            |                 |         "anio_utc": 2014,                +
+            |                 |         "magnitud_maxima": 6.9,          +
+            |                 |         "cantidad_eventos": 6,           +
+            |                 |         "magnitud_promedio": 6.30,       +
+            |                 |         "profundidad_promedio_km": 62.33 +
+            |                 |     }                                    +
+            |                 | ]
+(2 rows)
+
+=== TIEMPOS Y USO DE INDICES ===
+ consulta | escenario  | tiempo_ms | shared_hit | shared_read | temp_read | temp_written |    indice_usado     
+----------+------------+-----------+------------+-------------+-----------+--------------+---------------------
+ C1       | SIN INDICE |     5.079 |      24268 |           0 |         0 |            0 | ninguno
+ C1       | CON INDICE |     0.068 |          3 |           0 |         0 |            0 | idx_ev_igp_m6_fecha
+(2 rows)
+
+=== PLANES DE EJECUCION ===
+ escenario  |                                                                                                               plan                                                                                                               
+------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ SIN INDICE | [                                                                                                                                                                                                                               +
+            |     {                                                                                                                                                                                                                           +
+            |         "Plan": {                                                                                                                                                                                                               +
+            |             "Plans": [                                                                                                                                                                                                          +
+            |                 {                                                                                                                                                                                                               +
+            |                     "Plans": [                                                                                                                                                                                                  +
+            |                         {                                                                                                                                                                                                       +
+            |                             "Alias": "ev",                                                                                                                                                                                      +
+            |                             "Filter": "((fecha_hora_origen >= '2010-01-01 00:00:00'::timestamp without time zone) AND (fecha_hora_origen < '2026-01-01 00:00:00'::timestamp without time zone) AND (magnitud >= '6'::numeric))",+
+            |                             "Disabled": false,                                                                                                                                                                                  +
+            |                             "Node Type": "Index Scan",                                                                                                                                                                          +
+            |                             "Plan Rows": 642,                                                                                                                                                                                   +
+            |                             "Index Cond": "((id_evento >= 200000000) AND (id_evento <= 299999999))",                                                                                                                            +
+            |                             "Index Name": "pk_evento_sismico",                                                                                                                                                                  +
+            |                             "Plan Width": 14,                                                                                                                                                                                   +
+            |                             "Total Cost": 1322.04,                                                                                                                                                                              +
+            |                             "Actual Rows": 70.00,                                                                                                                                                                               +
+            |                             "Actual Loops": 1,                                                                                                                                                                                  +
+            |                             "Startup Cost": 0.29,                                                                                                                                                                               +
+            |                             "Async Capable": false,                                                                                                                                                                             +
+            |                             "Relation Name": "evento_sismico",                                                                                                                                                                  +
+            |                             "Index Searches": 1,                                                                                                                                                                                +
+            |                             "Parallel Aware": false,                                                                                                                                                                            +
+            |                             "Scan Direction": "Forward",                                                                                                                                                                        +
+            |                             "Local Hit Blocks": 0,                                                                                                                                                                              +
+            |                             "Temp Read Blocks": 0,                                                                                                                                                                              +
+            |                             "Actual Total Time": 4.999,                                                                                                                                                                         +
+            |                             "Local Read Blocks": 0,                                                                                                                                                                             +
+            |                             "Shared Hit Blocks": 24268,                                                                                                                                                                         +
+            |                             "Shared Read Blocks": 0,                                                                                                                                                                            +
+            |                             "Actual Startup Time": 2.692,                                                                                                                                                                       +
+            |                             "Parent Relationship": "Outer",                                                                                                                                                                     +
+            |                             "Temp Written Blocks": 0,                                                                                                                                                                           +
+            |                             "Local Dirtied Blocks": 0,                                                                                                                                                                          +
+            |                             "Local Written Blocks": 0,                                                                                                                                                                          +
+            |                             "Shared Dirtied Blocks": 0,                                                                                                                                                                         +
+            |                             "Shared Written Blocks": 0,                                                                                                                                                                         +
+            |                             "Rows Removed by Filter": 24219,                                                                                                                                                                    +
+            |                             "Rows Removed by Index Recheck": 0                                                                                                                                                                  +
+            |                         }                                                                                                                                                                                                       +
+            |                     ],                                                                                                                                                                                                          +
+            |                     "Filter": "(count(*) >= 1)",                                                                                                                                                                                +
+            |                     "Disabled": false,                                                                                                                                                                                          +
+            |                     "Strategy": "Hashed",                                                                                                                                                                                       +
+            |                     "Group Key": [                                                                                                                                                                                              +
+            |                         "(EXTRACT(year FROM fecha_hora_origen))::integer"                                                                                                                                                       +
+            |                     ],                                                                                                                                                                                                          +
+            |                     "Node Type": "Aggregate",                                                                                                                                                                                   +
+            |                     "Plan Rows": 214,                                                                                                                                                                                           +
+            |                     "Disk Usage": 0,                                                                                                                                                                                            +
+            |                     "Plan Width": 108,                                                                                                                                                                                          +
+            |                     "Total Cost": 1343.44,                                                                                                                                                                                      +
+            |                     "Actual Rows": 15.00,                                                                                                                                                                                       +
+            |                     "Actual Loops": 1,                                                                                                                                                                                          +
+            |                     "Partial Mode": "Simple",                                                                                                                                                                                   +
+            |                     "Startup Cost": 1330.07,                                                                                                                                                                                    +
+            |                     "Async Capable": false,                                                                                                                                                                                     +
+            |                     "Parallel Aware": false,                                                                                                                                                                                    +
+            |                     "HashAgg Batches": 1,                                                                                                                                                                                       +
+            |                     "Local Hit Blocks": 0,                                                                                                                                                                                      +
+            |                     "Temp Read Blocks": 0,                                                                                                                                                                                      +
+            |                     "Actual Total Time": 5.050,                                                                                                                                                                                 +
+            |                     "Local Read Blocks": 0,                                                                                                                                                                                     +
+            |                     "Peak Memory Usage": 57,                                                                                                                                                                                    +
+            |                     "Shared Hit Blocks": 24268,                                                                                                                                                                                 +
+            |                     "Planned Partitions": 0,                                                                                                                                                                                    +
+            |                     "Shared Read Blocks": 0,                                                                                                                                                                                    +
+            |                     "Actual Startup Time": 5.041,                                                                                                                                                                               +
+            |                     "Parent Relationship": "Outer",                                                                                                                                                                             +
+            |                     "Temp Written Blocks": 0,                                                                                                                                                                                   +
+            |                     "Local Dirtied Blocks": 0,                                                                                                                                                                                  +
+            |                     "Local Written Blocks": 0,                                                                                                                                                                                  +
+            |                     "Shared Dirtied Blocks": 0,                                                                                                                                                                                 +
+            |                     "Shared Written Blocks": 0,                                                                                                                                                                                 +
+            |                     "Rows Removed by Filter": 0                                                                                                                                                                                 +
+            |                 }                                                                                                                                                                                                               +
+            |             ],                                                                                                                                                                                                                  +
+            |             "Disabled": false,                                                                                                                                                                                                  +
+            |             "Sort Key": [                                                                                                                                                                                                       +
+            |                 "((EXTRACT(year FROM fecha_hora_origen))::integer)"                                                                                                                                                             +
+            |             ],                                                                                                                                                                                                                  +
+            |             "Node Type": "Sort",                                                                                                                                                                                                +
+            |             "Plan Rows": 214,                                                                                                                                                                                                   +
+            |             "Plan Width": 108,                                                                                                                                                                                                  +
+            |             "Total Cost": 1352.26,                                                                                                                                                                                              +
+            |             "Actual Rows": 15.00,                                                                                                                                                                                               +
+            |             "Sort Method": "quicksort",                                                                                                                                                                                         +
+            |             "Actual Loops": 1,                                                                                                                                                                                                  +
+            |             "Startup Cost": 1351.72,                                                                                                                                                                                            +
+            |             "Async Capable": false,                                                                                                                                                                                             +
+            |             "Parallel Aware": false,                                                                                                                                                                                            +
+            |             "Sort Space Type": "Memory",                                                                                                                                                                                        +
+            |             "Sort Space Used": 25,                                                                                                                                                                                              +
+            |             "Local Hit Blocks": 0,                                                                                                                                                                                              +
+            |             "Temp Read Blocks": 0,                                                                                                                                                                                              +
+            |             "Actual Total Time": 5.058,                                                                                                                                                                                         +
+            |             "Local Read Blocks": 0,                                                                                                                                                                                             +
+            |             "Shared Hit Blocks": 24268,                                                                                                                                                                                         +
+            |             "Shared Read Blocks": 0,                                                                                                                                                                                            +
+            |             "Actual Startup Time": 5.057,                                                                                                                                                                                       +
+            |             "Temp Written Blocks": 0,                                                                                                                                                                                           +
+            |             "Local Dirtied Blocks": 0,                                                                                                                                                                                          +
+            |             "Local Written Blocks": 0,                                                                                                                                                                                          +
+            |             "Shared Dirtied Blocks": 0,                                                                                                                                                                                         +
+            |             "Shared Written Blocks": 0                                                                                                                                                                                          +
+            |         },                                                                                                                                                                                                                      +
+            |         "Planning": {                                                                                                                                                                                                           +
+            |             "Local Hit Blocks": 0,                                                                                                                                                                                              +
+            |             "Temp Read Blocks": 0,                                                                                                                                                                                              +
+            |             "Local Read Blocks": 0,                                                                                                                                                                                             +
+            |             "Shared Hit Blocks": 3,                                                                                                                                                                                             +
+            |             "Shared Read Blocks": 0,                                                                                                                                                                                            +
+            |             "Temp Written Blocks": 0,                                                                                                                                                                                           +
+            |             "Local Dirtied Blocks": 0,                                                                                                                                                                                          +
+            |             "Local Written Blocks": 0,                                                                                                                                                                                          +
+            |             "Shared Dirtied Blocks": 0,                                                                                                                                                                                         +
+            |             "Shared Written Blocks": 0                                                                                                                                                                                          +
+            |         },                                                                                                                                                                                                                      +
+            |         "Triggers": [                                                                                                                                                                                                           +
+            |         ],                                                                                                                                                                                                                      +
+            |         "Planning Time": 0.097,                                                                                                                                                                                                 +
+            |         "Execution Time": 5.079                                                                                                                                                                                                 +
+            |     }                                                                                                                                                                                                                           +
+            | ]
+ CON INDICE | [                                                                                                                                                                                                                               +
+            |     {                                                                                                                                                                                                                           +
+            |         "Plan": {                                                                                                                                                                                                               +
+            |             "Plans": [                                                                                                                                                                                                          +
+            |                 {                                                                                                                                                                                                               +
+            |                     "Plans": [                                                                                                                                                                                                  +
+            |                         {                                                                                                                                                                                                       +
+            |                             "Alias": "ev",                                                                                                                                                                                      +
+            |                             "Disabled": false,                                                                                                                                                                                  +
+            |                             "Node Type": "Index Only Scan",                                                                                                                                                                     +
+            |                             "Plan Rows": 629,                                                                                                                                                                                   +
+            |                             "Index Cond": "((fecha_hora_origen >= '2010-01-01 00:00:00'::timestamp without time zone) AND (fecha_hora_origen < '2026-01-01 00:00:00'::timestamp without time zone))",                           +
+            |                             "Index Name": "idx_ev_igp_m6_fecha",                                                                                                                                                                +
+            |                             "Plan Width": 14,                                                                                                                                                                                   +
+            |                             "Total Cost": 28.95,                                                                                                                                                                                +
+            |                             "Actual Rows": 70.00,                                                                                                                                                                               +
+            |                             "Actual Loops": 1,                                                                                                                                                                                  +
+            |                             "Heap Fetches": 0,                                                                                                                                                                                  +
+            |                             "Startup Cost": 0.27,                                                                                                                                                                               +
+            |                             "Async Capable": false,                                                                                                                                                                             +
+            |                             "Relation Name": "evento_sismico",                                                                                                                                                                  +
+            |                             "Index Searches": 1,                                                                                                                                                                                +
+            |                             "Parallel Aware": false,                                                                                                                                                                            +
+            |                             "Scan Direction": "Forward",                                                                                                                                                                        +
+            |                             "Local Hit Blocks": 0,                                                                                                                                                                              +
+            |                             "Temp Read Blocks": 0,                                                                                                                                                                              +
+            |                             "Actual Total Time": 0.018,                                                                                                                                                                         +
+            |                             "Local Read Blocks": 0,                                                                                                                                                                             +
+            |                             "Shared Hit Blocks": 3,                                                                                                                                                                             +
+            |                             "Shared Read Blocks": 0,                                                                                                                                                                            +
+            |                             "Actual Startup Time": 0.007,                                                                                                                                                                       +
+            |                             "Parent Relationship": "Outer",                                                                                                                                                                     +
+            |                             "Temp Written Blocks": 0,                                                                                                                                                                           +
+            |                             "Local Dirtied Blocks": 0,                                                                                                                                                                          +
+            |                             "Local Written Blocks": 0,                                                                                                                                                                          +
+            |                             "Shared Dirtied Blocks": 0,                                                                                                                                                                         +
+            |                             "Shared Written Blocks": 0,                                                                                                                                                                         +
+            |                             "Rows Removed by Index Recheck": 0                                                                                                                                                                  +
+            |                         }                                                                                                                                                                                                       +
+            |                     ],                                                                                                                                                                                                          +
+            |                     "Filter": "(count(*) >= 1)",                                                                                                                                                                                +
+            |                     "Disabled": false,                                                                                                                                                                                          +
+            |                     "Strategy": "Hashed",                                                                                                                                                                                       +
+            |                     "Group Key": [                                                                                                                                                                                              +
+            |                         "(EXTRACT(year FROM fecha_hora_origen))::integer"                                                                                                                                                       +
+            |                     ],                                                                                                                                                                                                          +
+            |                     "Node Type": "Aggregate",                                                                                                                                                                                   +
+            |                     "Plan Rows": 210,                                                                                                                                                                                           +
+            |                     "Disk Usage": 0,                                                                                                                                                                                            +
+            |                     "Plan Width": 108,                                                                                                                                                                                          +
+            |                     "Total Cost": 49.92,                                                                                                                                                                                        +
+            |                     "Actual Rows": 15.00,                                                                                                                                                                                       +
+            |                     "Actual Loops": 1,                                                                                                                                                                                          +
+            |                     "Partial Mode": "Simple",                                                                                                                                                                                   +
+            |                     "Startup Cost": 36.81,                                                                                                                                                                                      +
+            |                     "Async Capable": false,                                                                                                                                                                                     +
+            |                     "Parallel Aware": false,                                                                                                                                                                                    +
+            |                     "HashAgg Batches": 1,                                                                                                                                                                                       +
+            |                     "Local Hit Blocks": 0,                                                                                                                                                                                      +
+            |                     "Temp Read Blocks": 0,                                                                                                                                                                                      +
+            |                     "Actual Total Time": 0.046,                                                                                                                                                                                 +
+            |                     "Local Read Blocks": 0,                                                                                                                                                                                     +
+            |                     "Peak Memory Usage": 57,                                                                                                                                                                                    +
+            |                     "Shared Hit Blocks": 3,                                                                                                                                                                                     +
+            |                     "Planned Partitions": 0,                                                                                                                                                                                    +
+            |                     "Shared Read Blocks": 0,                                                                                                                                                                                    +
+            |                     "Actual Startup Time": 0.037,                                                                                                                                                                               +
+            |                     "Parent Relationship": "Outer",                                                                                                                                                                             +
+            |                     "Temp Written Blocks": 0,                                                                                                                                                                                   +
+            |                     "Local Dirtied Blocks": 0,                                                                                                                                                                                  +
+            |                     "Local Written Blocks": 0,                                                                                                                                                                                  +
+            |                     "Shared Dirtied Blocks": 0,                                                                                                                                                                                 +
+            |                     "Shared Written Blocks": 0,                                                                                                                                                                                 +
+            |                     "Rows Removed by Filter": 0                                                                                                                                                                                 +
+            |                 }                                                                                                                                                                                                               +
+            |             ],                                                                                                                                                                                                                  +
+            |             "Disabled": false,                                                                                                                                                                                                  +
+            |             "Sort Key": [                                                                                                                                                                                                       +
+            |                 "((EXTRACT(year FROM fecha_hora_origen))::integer)"                                                                                                                                                             +
+            |             ],                                                                                                                                                                                                                  +
+            |             "Node Type": "Sort",                                                                                                                                                                                                +
+            |             "Plan Rows": 210,                                                                                                                                                                                                   +
+            |             "Plan Width": 108,                                                                                                                                                                                                  +
+            |             "Total Cost": 58.54,                                                                                                                                                                                                +
+            |             "Actual Rows": 15.00,                                                                                                                                                                                               +
+            |             "Sort Method": "quicksort",                                                                                                                                                                                         +
+            |             "Actual Loops": 1,                                                                                                                                                                                                  +
+            |             "Startup Cost": 58.02,                                                                                                                                                                                              +
+            |             "Async Capable": false,                                                                                                                                                                                             +
+            |             "Parallel Aware": false,                                                                                                                                                                                            +
+            |             "Sort Space Type": "Memory",                                                                                                                                                                                        +
+            |             "Sort Space Used": 25,                                                                                                                                                                                              +
+            |             "Local Hit Blocks": 0,                                                                                                                                                                                              +
+            |             "Temp Read Blocks": 0,                                                                                                                                                                                              +
+            |             "Actual Total Time": 0.051,                                                                                                                                                                                         +
+            |             "Local Read Blocks": 0,                                                                                                                                                                                             +
+            |             "Shared Hit Blocks": 3,                                                                                                                                                                                             +
+            |             "Shared Read Blocks": 0,                                                                                                                                                                                            +
+            |             "Actual Startup Time": 0.050,                                                                                                                                                                                       +
+            |             "Temp Written Blocks": 0,                                                                                                                                                                                           +
+            |             "Local Dirtied Blocks": 0,                                                                                                                                                                                          +
+            |             "Local Written Blocks": 0,                                                                                                                                                                                          +
+            |             "Shared Dirtied Blocks": 0,                                                                                                                                                                                         +
+            |             "Shared Written Blocks": 0                                                                                                                                                                                          +
+            |         },                                                                                                                                                                                                                      +
+            |         "Planning": {                                                                                                                                                                                                           +
+            |             "Local Hit Blocks": 0,                                                                                                                                                                                              +
+            |             "Temp Read Blocks": 0,                                                                                                                                                                                              +
+            |             "Local Read Blocks": 0,                                                                                                                                                                                             +
+            |             "Shared Hit Blocks": 15,                                                                                                                                                                                            +
+            |             "Shared Read Blocks": 0,                                                                                                                                                                                            +
+            |             "Temp Written Blocks": 0,                                                                                                                                                                                           +
+            |             "Local Dirtied Blocks": 0,                                                                                                                                                                                          +
+            |             "Local Written Blocks": 0,                                                                                                                                                                                          +
+            |             "Shared Dirtied Blocks": 0,                                                                                                                                                                                         +
+            |             "Shared Written Blocks": 0                                                                                                                                                                                          +
+            |         },                                                                                                                                                                                                                      +
+            |         "Triggers": [                                                                                                                                                                                                           +
+            |         ],                                                                                                                                                                                                                      +
+            |         "Planning Time": 0.109,                                                                                                                                                                                                 +
+            |         "Execution Time": 0.068                                                                                                                                                                                                 +
+            |     }                                                                                                                                                                                                                           +
+            | ]
+(2 rows)
+
+psql:../sql/07_demostracion_video.sql:310: NOTICE:  OK: consulta equivalente en ambos escenarios
+DO
+=== RESTAURACION ===
+ROLLBACK
+psql:../sql/07_demostracion_video.sql:331: NOTICE:  OK: indices candidatos revertidos
+DO
+=== ETAPA 7 FINALIZADA ===

@@ -1,0 +1,98 @@
+Pager usage is off.
+=== ESTRUCTURA: VALIDACION DE BASE ===
+           base_actual           
+---------------------------------
+ bd_sismologico_auditoria_cierre
+(1 row)
+
+DO
+=== ESTRUCTURA: CREACION DE TABLAS Y RESTRICCIONES ===
+BEGIN
+CREATE SCHEMA
+SET
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+COMMIT
+=== ESTRUCTURA: COMPROBACION ===
+      tabla       
+------------------
+ alerta
+ deteccion
+ estacion_sismica
+ evento_sismico
+ lectura_onda
+ sensor
+(6 rows)
+
+ restriccion | cantidad 
+-------------+----------
+ CHECK       |        8
+ FOREIGN KEY |        5
+ NOT NULL    |       36
+ PRIMARY KEY |        6
+ UNIQUE      |        3
+(5 rows)
+
+psql:01_estructura.sql:216: NOTICE:  OK: seis tablas y restricciones comprobadas.
+DO
+=== ESTRUCTURA: PRUEBAS DE INTEGRIDAD ===
+BEGIN
+SET
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+      tabla       | registros 
+------------------+-----------
+ estacion_sismica |         1
+ sensor           |         1
+ lectura_onda     |         1
+ evento_sismico   |         1
+ deteccion        |         1
+ alerta           |         1
+(6 rows)
+
+psql:01_estructura.sql:322: NOTICE:  OK: latitud fuera de rango rechazada
+psql:01_estructura.sql:322: NOTICE:  OK: frecuencia 0 rechazada
+psql:01_estructura.sql:322: NOTICE:  OK: duplicado sensor-fecha-canal rechazado
+psql:01_estructura.sql:322: NOTICE:  OK: referencia inexistente rechazada
+psql:01_estructura.sql:322: NOTICE:  OK: llave primaria compuesta comprobada
+DO
+ROLLBACK
+=== ESTRUCTURA: COMPROBACION POSTERIOR ===
+      tabla       | registros_prueba 
+------------------+------------------
+ estacion_sismica |                0
+ sensor           |                0
+ lectura_onda     |                0
+ evento_sismico   |                0
+ deteccion        |                0
+ alerta           |                0
+(6 rows)
+
+psql:01_estructura.sql:370: NOTICE:  OK: las seis tablas permanecen vacias tras ROLLBACK
+DO
+=== ETAPA 1 FINALIZADA ===

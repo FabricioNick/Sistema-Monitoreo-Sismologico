@@ -19,7 +19,7 @@
 \endif
 
 \echo '=== CONFIGURACION ==='
-SELECT 1 / CASE WHEN :'escala' IN ('1000','10000','100000','1000000') THEN 1 ELSE 0 END AS escala_valida;
+SELECT 1 / CASE WHEN :'escala' IN ('100','1000','10000','100000','1000000') THEN 1 ELSE 0 END AS escala_valida;
 SELECT :'prefijo' || :'escala' AS base_destino \gset
 SELECT :'base_destino' AS base_destino, :'escala'::INTEGER AS registros_objetivo;
 
@@ -35,7 +35,7 @@ END
 \echo '=== GENERACION DE DATOS ==='
 DO $$
 BEGIN
-    IF current_database() !~ '^bd_sismologico_(prueba_)?exp_(1000|10000|100000|1000000)$' THEN
+    IF current_database() !~ '^bd_sismologico_(prueba_)?exp_(100|1000|10000|100000|1000000)$' THEN
         RAISE EXCEPTION 'Base incorrecta: %. No se modifica la base principal.', current_database();
     END IF;
     IF EXISTS (
@@ -49,6 +49,7 @@ END;
 $$;
 
 \echo '=== ESTRUCTURA ==='
+BEGIN;
 CREATE SCHEMA IF NOT EXISTS monitoreo_sismologico;
 SET search_path TO monitoreo_sismologico, public;
 
@@ -186,12 +187,12 @@ ALTER TABLE deteccion
     ADD CONSTRAINT ck_deteccion_aceleracion
     CHECK (aceleracion_maxima IS NULL OR aceleracion_maxima >= 0);
 
-BEGIN;
 SET LOCAL search_path TO monitoreo_sismologico, public;
 
 CREATE TEMP TABLE exp_parametros_52 ON COMMIT DROP AS
 SELECT *
 FROM (VALUES
+    ('bd_sismologico_exp_100',        100,   2,   6,     45,      5,     34,     8,    5),
     ('bd_sismologico_exp_1000',       1000,   5,  15,    100,     50,    750,    90,   40),
     ('bd_sismologico_exp_10000',     10000,  10,  30,   2000,    800,   7550,   300,  110),
     ('bd_sismologico_exp_100000',   100000,  25,  75,  24000,  12000,  74700,   900,  300),
@@ -421,10 +422,8 @@ UNION ALL SELECT 'lectura_onda',COUNT(*) FROM lectura_onda
 UNION ALL SELECT 'deteccion',COUNT(*) FROM deteccion
 UNION ALL SELECT 'alerta',COUNT(*) FROM alerta
 ORDER BY tabla;
-COMMIT;
 
 \echo '=== REGLAS AUTOMATICAS ==='
-BEGIN;
 SET LOCAL search_path TO monitoreo_sismologico, public;
 
 CREATE OR REPLACE FUNCTION fn_trg_lectura_operativa()
@@ -744,8 +743,6 @@ WHERE n.nspname = 'monitoreo_sismologico'
   )
 ORDER BY tabla, trigger;
 
-COMMIT;
-
 ANALYZE monitoreo_sismologico.estacion_sismica;
 ANALYZE monitoreo_sismologico.sensor;
 ANALYZE monitoreo_sismologico.evento_sismico;
@@ -766,6 +763,7 @@ SET search_path TO monitoreo_sismologico, public;
 
 WITH parametros AS (
 SELECT * FROM (VALUES
+    ('bd_sismologico_exp_100',         100,   2,   6,     45,      5,     34,     8,    5),
     ('bd_sismologico_exp_1000',       1000,   5,  15,    100,     50,    750,    90,   40),
     ('bd_sismologico_exp_10000',     10000,  10,  30,   2000,    800,   7550,   300,  110),
     ('bd_sismologico_exp_100000',   100000,  25,  75,  24000,  12000,  74700,   900,  300),
@@ -811,41 +809,55 @@ SELECT current_database() AS base_experimental,
        pg_size_pretty(pg_database_size(current_database())) AS espacio_ocupado;
 
 DO $$
-DECLARE v_total BIGINT; v_esperado BIGINT; v_igp INTEGER;
+DECLARE
+    p RECORD;
+    v_total BIGINT;
 BEGIN
-    SELECT total,n_igp INTO v_esperado,v_igp
-    FROM (VALUES
-      ('bd_sismologico_exp_1000',1000,50),
-      ('bd_sismologico_exp_10000',10000,800),
-      ('bd_sismologico_exp_100000',100000,12000),
-      ('bd_sismologico_exp_1000000',1000000,24289)
-    ) AS p(nombre,total,n_igp)
+    SELECT * INTO p FROM (VALUES
+        ('bd_sismologico_exp_100',        100,  2,   6,     45,    34,     8,    5,     5),
+        ('bd_sismologico_exp_1000',      1000,  5,  15,    100,   750,   90,   40,    50),
+        ('bd_sismologico_exp_10000',    10000, 10,  30,   2000,  7550,  300,  110,   800),
+        ('bd_sismologico_exp_100000',  100000, 25,  75,  24000, 74700,  900,  300, 12000),
+        ('bd_sismologico_exp_1000000',1000000,100, 300, 120000,875000, 3500, 1100, 24289)
+    ) AS v(nombre,total,n_est,n_sen,n_evt,n_lec,n_det,n_ale,n_igp)
     WHERE nombre = 'bd_sismologico_exp_' || regexp_replace(current_database(), '^.*_', '');
-    IF NOT FOUND THEN RAISE EXCEPTION 'Escala no reconocida'; END IF;
-    SELECT (SELECT COUNT(*) FROM estacion_sismica)
-         + (SELECT COUNT(*) FROM sensor)
-         + (SELECT COUNT(*) FROM evento_sismico)
-         + (SELECT COUNT(*) FROM lectura_onda)
-         + (SELECT COUNT(*) FROM deteccion)
-         + (SELECT COUNT(*) FROM alerta) INTO v_total;
-    IF v_total <> v_esperado
-       OR (SELECT COUNT(*) FROM evento_sismico WHERE id_evento BETWEEN 200000000 AND 299999999)<>v_igp
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Escala no reconocida';
+    END IF;
+
+    SELECT (SELECT COUNT(*) FROM monitoreo_sismologico.estacion_sismica)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.sensor)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.evento_sismico)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.lectura_onda)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.deteccion)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.alerta)
+    INTO v_total;
+
+    IF v_total <> p.total
+       OR (SELECT COUNT(*) FROM estacion_sismica) <> p.n_est
+       OR (SELECT COUNT(*) FROM sensor) <> p.n_sen
+       OR (SELECT COUNT(*) FROM evento_sismico) <> p.n_evt
+       OR (SELECT COUNT(*) FROM lectura_onda) <> p.n_lec
+       OR (SELECT COUNT(*) FROM deteccion) <> p.n_det
+       OR (SELECT COUNT(*) FROM alerta) <> p.n_ale
+       OR (SELECT COUNT(*) FROM evento_sismico WHERE id_evento BETWEEN 200000000 AND 299999999) <> p.n_igp
        OR (SELECT COUNT(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid
            JOIN pg_namespace n ON n.oid=c.relnamespace
-           WHERE n.nspname='monitoreo_sismologico' AND NOT t.tgisinternal)<>9
+           WHERE n.nspname='monitoreo_sismologico' AND NOT t.tgisinternal) <> 9
        OR EXISTS (SELECT 1 FROM estacion_sismica e
-            WHERE NOT EXISTS (SELECT 1 FROM sensor s WHERE s.id_estacion=e.id_estacion))
+           WHERE NOT EXISTS (SELECT 1 FROM sensor s WHERE s.id_estacion=e.id_estacion))
        OR EXISTS (SELECT 1 FROM deteccion d
-            WHERE NOT EXISTS (SELECT 1 FROM lectura_onda l
-                WHERE l.id_sensor=d.id_sensor AND l.fecha_hora=d.hora_deteccion AND l.es_valida))
+           WHERE NOT EXISTS (SELECT 1 FROM lectura_onda l
+               WHERE l.id_sensor=d.id_sensor AND l.fecha_hora=d.hora_deteccion AND l.es_valida))
        OR EXISTS (SELECT 1 FROM deteccion WHERE id_evento BETWEEN 200000000 AND 299999999)
        OR EXISTS (SELECT 1 FROM alerta WHERE id_evento BETWEEN 200000000 AND 299999999) THEN
-        RAISE EXCEPTION 'REVISAR: escala, catalogo, triggers o integridad';
+        RAISE EXCEPTION 'REVISAR: escala, distribucion, catalogo, triggers o integridad';
     END IF;
     RAISE NOTICE 'OK: base %, % filas, % eventos IGP reales y 9 triggers.',
-       current_database(),v_total,v_igp;
+        current_database(), v_total, p.n_igp;
 END;
 $$;
 
+COMMIT;
 \echo '=== ETAPA 4 FINALIZADA ==='
 SELECT current_database() AS base_verificada;

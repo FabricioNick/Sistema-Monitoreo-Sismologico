@@ -1,0 +1,185 @@
+Pager usage is off.
+=== DATOS: BASE DE TRABAJO ===
+           base_actual           
+---------------------------------
+ bd_sismologico_auditoria_cierre
+(1 row)
+
+SET
+psql:02_datos.sql:34: NOTICE:  OK: seis tablas vacias.
+DO
+BEGIN
+SET
+=== CARGA INICIAL ===
+DO
+INSERT 0 5
+INSERT 0 10
+INSERT 0 190
+INSERT 0 8
+INSERT 0 14
+INSERT 0 5
+psql:02_datos.sql:329: NOTICE:  OK: 232 registros sintéticos verificados antes del COMMIT
+DO
+=== CONTROL DE CARGA INICIAL ===
+      tabla       | esperado | encontrado | resultado 
+------------------+----------+------------+-----------
+ alerta           |        5 |          5 | OK
+ deteccion        |       14 |         14 | OK
+ estacion_sismica |        5 |          5 | OK
+ evento_sismico   |        8 |          8 | OK
+ lectura_onda     |      190 |        190 | OK
+ sensor           |       10 |         10 | OK
+(6 rows)
+
+               control                | encontrados | esperado 
+--------------------------------------+-------------+----------
+ estaciones_sin_sensores              |           0 |        0
+ lecturas_huerfanas                   |           0 |        0
+ detecciones_sin_lectura_valida       |           0 |        0
+ lecturas_validas_sensor_no_operativo |           0 |        0
+(4 rows)
+
+ lecturas_validas | lecturas_invalidas 
+------------------+--------------------
+              166 |                 24
+(1 row)
+
+ id_evento | sensores_que_detectaron | alertas_emitidas 
+-----------+-------------------------+------------------
+ 810000001 |                       3 |                1
+ 810000002 |                       2 |                1
+ 810000003 |                       2 |                1
+ 810000004 |                       2 |                0
+ 810000005 |                       2 |                1
+ 810000006 |                       1 |                0
+ 810000007 |                       2 |                1
+ 810000008 |                       0 |                0
+(8 rows)
+
+=== IMPORTACION DEL CATALOGO IGP ===
+CREATE TABLE
+COPY 24289
+psql:02_datos.sql:444: NOTICE:  Filas del CSV oficial IGP leidas: 24289
+DO
+INSERT 0 24289
+psql:02_datos.sql:503: NOTICE:  OK: 24289 eventos del archivo IGP y 8 eventos sinteticos conservados.
+DO
+ filas_igp_en_csv | eventos_igp_en_bd | eventos_sinteticos 
+------------------+-------------------+--------------------
+            24289 |             24289 |                  8
+(1 row)
+
+=== CONTROL DEL CATALOGO IGP ===
+      tabla       | encontrados | minimo_inicial 
+------------------+-------------+----------------
+ alerta           |           5 |              5
+ deteccion        |          14 |             14
+ estacion_sismica |           5 |              5
+ lectura_onda     |         190 |            190
+ sensor           |          10 |             10
+(5 rows)
+
+ eventos_sinteticos | eventos_igp | eventos_totales 
+--------------------+-------------+-----------------
+                  8 |       24289 |           24297
+(1 row)
+
+ valores_fuera_de_rango | registros_con_datos_no_informados_rellenados 
+------------------------+----------------------------------------------
+                      0 |                                            0
+(1 row)
+
+ primer_evento_igp_utc | ultimo_evento_igp_utc | magnitud_minima | magnitud_maxima 
+-----------------------+-----------------------+-----------------+-----------------
+ 1960-01-13 15:40:34   | 2025-12-31 20:34:41   |               3 |             8.4
+(1 row)
+
+ id_evento |  fecha_hora_origen  | latitud_epicentro | longitud_epicentro | profundidad_km | magnitud |  estado_revision   
+-----------+---------------------+-------------------+--------------------+----------------+----------+--------------------
+ 200000000 | 1960-01-13 15:40:34 |           -16.145 |            -72.144 |             60 |      7.5 | pendiente_revision
+ 200000001 | 1960-01-15 09:30:24 |               -15 |                -75 |             70 |        7 | pendiente_revision
+ 200000002 | 1960-01-17 02:57:58 |             -14.5 |              -74.5 |            150 |      6.4 | pendiente_revision
+ 200000003 | 1960-01-23 03:37:32 |             -12.5 |              -68.5 |            300 |      5.8 | pendiente_revision
+ 200000004 | 1960-01-30 05:07:24 |              -5.5 |              -77.5 |            100 |      5.7 | pendiente_revision
+(5 rows)
+
+=== SIMULACION COMPLEMENTARIA ===
+DO
+INSERT 0 10
+INSERT 0 30
+INSERT 0 30
+INSERT 0 1000
+INSERT 0 90
+INSERT 0 24
+psql:02_datos.sql:720: NOTICE:  OK: 1184 registros simulados generados y verificados antes de COMMIT.
+DO
+    tipo     | generados 
+-------------+-----------
+ estaciones  |        10
+ sensores    |        30
+ eventos     |        30
+ lecturas    |      1000
+ detecciones |        90
+ alertas     |        24
+(6 rows)
+
+=== CONTROL DE SIMULACION ===
+      tabla       | esperado | encontrados | resultado 
+------------------+----------+-------------+-----------
+ alerta           |       29 |          29 | OK
+ deteccion        |      104 |         104 | OK
+ estacion_sismica |       15 |          15 | OK
+ evento_sismico   |    24327 |       24327 | OK
+ lectura_onda     |     1190 |        1190 | OK
+ sensor           |       40 |          40 | OK
+(6 rows)
+
+ eventos_igp | eventos_simulados_iniciales | eventos_simulados_nuevos | detecciones_sobre_igp | alertas_sobre_igp 
+-------------+-----------------------------+--------------------------+-----------------------+-------------------
+       24289 |                           8 |                       30 |                     0 |                 0
+(1 row)
+
+    clase    | generados 
+-------------+-----------
+ alertas     |        24
+ detecciones |        90
+ estaciones  |        10
+ eventos     |        30
+ lecturas    |      1000
+ sensores    |        30
+(6 rows)
+
+               control                | encontrados | esperado 
+--------------------------------------+-------------+----------
+ alertas_anteriores_al_evento         |           0 |        0
+ detecciones_sin_lectura_valida       |           0 |        0
+ estaciones_sin_sensor                |           0 |        0
+ lecturas_sin_sensor                  |           0 |        0
+ lecturas_validas_sensor_no_operativo |           0 |        0
+(5 rows)
+
+ nuevas_lecturas | validas | invalidas |   primera_lectura   |   ultima_lectura    
+-----------------+---------+-----------+---------------------+---------------------
+            1000 |     947 |        53 | 2026-08-01 00:00:00 | 2026-08-30 00:00:29
+(1 row)
+
+ registros_totales | esperado 
+-------------------+----------
+             25705 |    25705
+(1 row)
+
+=== RESULTADOS FINALES ===
+      tabla       | esperado | obtenido | estado 
+------------------+----------+----------+--------
+ alerta           |       29 |       29 | OK
+ deteccion        |      104 |      104 | OK
+ estacion_sismica |       15 |       15 | OK
+ evento_sismico   |    24327 |    24327 | OK
+ lectura_onda     |     1190 |     1190 | OK
+ sensor           |       40 |       40 | OK
+(6 rows)
+
+psql:02_datos.sql:864: NOTICE:  OK: seis tablas validadas; 25705 registros, 24289 eventos oficiales IGP.
+DO
+COMMIT
+=== ETAPA 2 FINALIZADA ===

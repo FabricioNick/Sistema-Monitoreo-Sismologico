@@ -719,12 +719,18 @@ BEGIN
 END;
 $$;
 
-SELECT 'estaciones' AS tipo, 10 AS generados
-UNION ALL SELECT 'sensores', 30
-UNION ALL SELECT 'eventos', 30
-UNION ALL SELECT 'lecturas', 1000
-UNION ALL SELECT 'detecciones', 90
-UNION ALL SELECT 'alertas', 24;
+SELECT 'estaciones' AS tipo, COUNT(*) AS generados FROM estacion_sismica
+WHERE id_estacion BETWEEN 820300001 AND 820300010
+UNION ALL SELECT 'sensores', COUNT(*) FROM sensor
+WHERE id_sensor BETWEEN 820300001 AND 820300030
+UNION ALL SELECT 'eventos', COUNT(*) FROM evento_sismico
+WHERE id_evento BETWEEN 820300001 AND 820300030
+UNION ALL SELECT 'lecturas', COUNT(*) FROM lectura_onda
+WHERE id_lectura BETWEEN 820300000001 AND 820300001000
+UNION ALL SELECT 'detecciones', COUNT(*) FROM deteccion
+WHERE id_evento BETWEEN 820300001 AND 820300030
+UNION ALL SELECT 'alertas', COUNT(*) FROM alerta
+WHERE id_alerta BETWEEN 820300001 AND 820300024;
 
 
 \echo '=== CONTROL DE SIMULACION ==='
@@ -844,10 +850,16 @@ BEGIN
     SELECT COUNT(*) INTO oficiales
     FROM evento_sismico
     WHERE id_evento BETWEEN 200000000 AND 299999999;
-    IF total <> 25705 OR oficiales <> 24289 THEN
-        RAISE EXCEPTION 'Recuentos incorrectos: total % (esperado 25705), IGP % (esperado 24289).', total, oficiales;
+    IF total <> 25705 OR oficiales <> 24289
+       OR (SELECT COUNT(*) FROM estacion_sismica) <> 15
+       OR (SELECT COUNT(*) FROM sensor) <> 40
+       OR (SELECT COUNT(*) FROM lectura_onda) <> 1190
+       OR (SELECT COUNT(*) FROM evento_sismico) <> 24327
+       OR (SELECT COUNT(*) FROM deteccion) <> 104
+       OR (SELECT COUNT(*) FROM alerta) <> 29 THEN
+        RAISE EXCEPTION 'Recuentos de carga incorrectos: total %, IGP %.', total, oficiales;
     END IF;
-    RAISE NOTICE 'OK: 25705 registros, de los cuales 24289 son eventos oficiales IGP.';
+    RAISE NOTICE 'OK: seis tablas validadas; % registros, % eventos oficiales IGP.', total, oficiales;
 END;
 $$;
 

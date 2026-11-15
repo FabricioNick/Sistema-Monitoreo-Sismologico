@@ -1,5 +1,4 @@
 -- 06. MEDICIONES
--- Dos calentamientos y cinco mediciones por escenario.
 
 \set ON_ERROR_STOP on
 \pset pager off
@@ -17,7 +16,7 @@ DECLARE
     v_esperado BIGINT[];
     v_igp INTEGER;
 BEGIN
-    IF v_c NOT BETWEEN 1 AND 5 OR v_e NOT IN (1000, 10000, 100000, 1000000) THEN
+    IF v_c NOT BETWEEN 1 AND 5 OR v_e NOT IN (100, 1000, 10000, 100000, 1000000) THEN
         RAISE EXCEPTION 'Consulta o escala incorrecta';
     END IF;
     IF current_database() <> 'bd_sismologico_prueba_exp_' || v_e THEN
@@ -33,6 +32,7 @@ BEGIN
         (SELECT COUNT(*) FROM monitoreo_sismologico.alerta)
     ] INTO v_tablas;
     v_esperado := CASE v_e
+        WHEN 100 THEN ARRAY[2,6,45,34,8,5]::BIGINT[]
         WHEN 1000 THEN ARRAY[5,15,100,750,90,40]::BIGINT[]
         WHEN 10000 THEN ARRAY[10,30,2000,7550,300,110]::BIGINT[]
         WHEN 100000 THEN ARRAY[25,75,24000,74700,900,300]::BIGINT[]
@@ -41,7 +41,7 @@ BEGIN
     IF v_tablas <> v_esperado THEN
         RAISE EXCEPTION 'Distribucion inesperada: %, esperado: %', v_tablas, v_esperado;
     END IF;
-    v_igp := CASE v_e WHEN 1000 THEN 50 WHEN 10000 THEN 800
+    v_igp := CASE v_e WHEN 100 THEN 5 WHEN 1000 THEN 50 WHEN 10000 THEN 800
         WHEN 100000 THEN 12000 ELSE 24289 END;
     IF (SELECT COUNT(*) FROM monitoreo_sismologico.evento_sismico
         WHERE id_evento BETWEEN 200000000 AND 299999999) <> v_igp THEN
@@ -78,6 +78,7 @@ CREATE TEMP TABLE resultado_mediciones (
     temp_written BIGINT NOT NULL,
     uso_indice_1 BOOLEAN NOT NULL,
     uso_indice_2 BOOLEAN NOT NULL,
+    uso_indice_3 BOOLEAN NOT NULL,
     filas_resultado INTEGER NOT NULL,
     firma_resultados TEXT NOT NULL,
     PRIMARY KEY (escenario, repeticion)
@@ -103,6 +104,7 @@ DECLARE
     v_raiz JSONB;
     v_uso_1 BOOLEAN;
     v_uso_2 BOOLEAN;
+    v_uso_3 BOOLEAN;
 BEGIN
     CASE v_c
         WHEN 1 THEN
@@ -194,80 +196,75 @@ INCLUDE (es_valida)$indice$
             v_tablas := ARRAY['lectura_onda'];
         WHEN 4 THEN
             v_sql := $consulta$
-WITH detecciones_resumen AS (
-    SELECT id_evento, COUNT(*) AS total_detecciones,
-           MIN(hora_deteccion) AS primera_deteccion
-    FROM deteccion
-    GROUP BY id_evento
-), alertas_resumen AS (
-    SELECT id_evento, COUNT(*) AS total_alertas,
-           MIN(fecha_hora_emision) AS primera_alerta
-    FROM alerta
-    GROUP BY id_evento
-)
-SELECT
-    ev.id_evento,
-    ev.fecha_hora_origen,
-    ev.magnitud,
-    COALESCE(d.total_detecciones, 0) AS total_detecciones,
-    COALESCE(a.total_alertas, 0) AS total_alertas,
-    ROUND(EXTRACT(EPOCH FROM (d.primera_deteccion - ev.fecha_hora_origen))::NUMERIC, 2)
-        AS segundos_primera_deteccion,
-    ROUND(EXTRACT(EPOCH FROM (a.primera_alerta - ev.fecha_hora_origen))::NUMERIC, 2)
-        AS segundos_primera_alerta
+SELECT ev.id_evento, ev.fecha_hora_origen, ev.magnitud,
+       d.total_detecciones, a.total_alertas,
+       ROUND(EXTRACT(EPOCH FROM
+           (d.primera_deteccion - ev.fecha_hora_origen))::NUMERIC, 2)
+           AS segundos_primera_deteccion,
+       ROUND(EXTRACT(EPOCH FROM
+           (a.primera_alerta - ev.fecha_hora_origen))::NUMERIC, 2)
+           AS segundos_primera_alerta
 FROM evento_sismico ev
-LEFT JOIN detecciones_resumen d ON d.id_evento = ev.id_evento
-LEFT JOIN alertas_resumen a ON a.id_evento = ev.id_evento
-WHERE (ev.id_evento BETWEEN 810000001 AND 810000008
-    OR ev.id_evento BETWEEN 820300001 AND 820300030)
-  AND (COALESCE(d.total_detecciones, 0) > 0
-    OR COALESCE(a.total_alertas, 0) > 0)
+LEFT JOIN LATERAL (
+    SELECT COUNT(*)::INTEGER AS total_detecciones,
+           MIN(hora_deteccion) AS primera_deteccion
+    FROM deteccion d
+    WHERE d.id_evento = ev.id_evento
+) d ON TRUE
+LEFT JOIN LATERAL (
+    SELECT COUNT(*)::INTEGER AS total_alertas,
+           MIN(fecha_hora_emision) AS primera_alerta
+    FROM alerta a
+    WHERE a.id_evento = ev.id_evento
+) a ON TRUE
+WHERE ev.estado_revision = 'simulado'
+  AND ev.fecha_hora_origen >= TIMESTAMP '2026-08-05 00:00:00'
+  AND ev.fecha_hora_origen < TIMESTAMP '2026-08-06 00:00:00'
+  AND (d.total_detecciones > 0 OR a.total_alertas > 0)
 ORDER BY ev.fecha_hora_origen DESC, ev.id_evento
 LIMIT 15
 $consulta$;
             v_indices := ARRAY[
-                $indice$CREATE INDEX idx_det_evento_hora_c4
+                $indice$CREATE INDEX idx_evento_fecha_c4
+    ON monitoreo_sismologico.evento_sismico (fecha_hora_origen) INCLUDE (magnitud, estado_revision)$indice$,
+                $indice$CREATE INDEX idx_deteccion_evento_hora_c4
     ON monitoreo_sismologico.deteccion (id_evento, hora_deteccion)$indice$,
                 $indice$CREATE INDEX idx_alerta_evento_hora_c4
     ON monitoreo_sismologico.alerta (id_evento, fecha_hora_emision)$indice$
             ];
-            v_nombres := ARRAY['idx_det_evento_hora_c4', 'idx_alerta_evento_hora_c4'];
-            v_tablas := ARRAY['deteccion', 'alerta'];
+            v_nombres := ARRAY['idx_evento_fecha_c4', 'idx_deteccion_evento_hora_c4', 'idx_alerta_evento_hora_c4'];
+            v_tablas := ARRAY['evento_sismico', 'deteccion', 'alerta'];
         WHEN 5 THEN
             v_sql := $consulta$
-SELECT
-    s.id_sensor,
-    s.numero_serie,
-    e.codigo AS codigo_estacion,
-    s.estado AS estado_sensor,
-    COUNT(*) AS lecturas_periodo,
-    COUNT(*) FILTER (WHERE NOT l.es_valida) AS lecturas_invalidas,
-    MAX(l.fecha_hora) AS ultima_lectura
-FROM sensor s
+SELECT s.id_sensor, s.numero_serie, e.codigo AS codigo_estacion,
+       COUNT(*) AS lecturas_periodo,
+       COUNT(*) FILTER (WHERE NOT l.es_valida) AS lecturas_invalidas,
+       ROUND(AVG(ABS(l.valor)), 6) AS amplitud_media_absoluta,
+       MAX(l.fecha_hora) AS ultima_lectura
+FROM lectura_onda l
+JOIN sensor s ON s.id_sensor = l.id_sensor
 JOIN estacion_sismica e ON e.id_estacion = s.id_estacion
-JOIN lectura_onda l ON l.id_sensor = s.id_sensor
-WHERE l.fecha_hora >= TIMESTAMP '2026-08-01 00:00:00'
-  AND l.fecha_hora < TIMESTAMP '2026-09-01 00:00:00'
+WHERE l.fecha_hora >= TIMESTAMP '2026-08-05 00:00:00'
+  AND l.fecha_hora < TIMESTAMP '2026-08-06 00:00:00'
   AND NOT EXISTS (
-      SELECT 1
-      FROM deteccion d
+      SELECT 1 FROM deteccion d
       WHERE d.id_sensor = s.id_sensor
-        AND d.hora_deteccion >= TIMESTAMP '2026-08-01 00:00:00'
-        AND d.hora_deteccion < TIMESTAMP '2026-09-01 00:00:00'
+        AND d.hora_deteccion >= TIMESTAMP '2026-08-05 00:00:00'
+        AND d.hora_deteccion < TIMESTAMP '2026-08-06 00:00:00'
   )
-GROUP BY s.id_sensor, s.numero_serie, e.codigo, s.estado
-HAVING COUNT(*) >= 20
-ORDER BY lecturas_invalidas DESC, lecturas_periodo DESC, s.id_sensor
+GROUP BY s.id_sensor, s.numero_serie, e.codigo
+HAVING COUNT(*) >= 1
+ORDER BY lecturas_invalidas DESC,
+         lecturas_periodo DESC, s.id_sensor
 LIMIT 15
 $consulta$;
             v_indices := ARRAY[
-                $indice$CREATE INDEX idx_lectura_sensor_hora_c5
-    ON monitoreo_sismologico.lectura_onda (id_sensor, fecha_hora)
-    INCLUDE (es_valida)$indice$,
-                $indice$CREATE INDEX idx_det_sensor_hora_c5
+                $indice$CREATE INDEX idx_lectura_fecha_sensor_c5
+    ON monitoreo_sismologico.lectura_onda (fecha_hora, id_sensor) INCLUDE (es_valida, valor)$indice$,
+                $indice$CREATE INDEX idx_deteccion_sensor_hora_c5
     ON monitoreo_sismologico.deteccion (id_sensor, hora_deteccion)$indice$
             ];
-            v_nombres := ARRAY['idx_lectura_sensor_hora_c5', 'idx_det_sensor_hora_c5'];
+            v_nombres := ARRAY['idx_lectura_fecha_sensor_c5', 'idx_deteccion_sensor_hora_c5'];
             v_tablas := ARRAY['lectura_onda', 'deteccion'];
     END CASE;
 
@@ -299,8 +296,10 @@ $consulta$;
             EXECUTE 'EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ' || v_sql INTO v_plan;
             v_raiz := v_plan->0->'Plan';
             v_uso_1 := POSITION(v_nombres[1] IN v_raiz::TEXT) > 0;
-            v_uso_2 := CASE WHEN ARRAY_LENGTH(v_nombres, 1) > 1
+            v_uso_2 := CASE WHEN ARRAY_LENGTH(v_nombres, 1) >= 2
                 THEN POSITION(v_nombres[2] IN v_raiz::TEXT) > 0 ELSE FALSE END;
+            v_uso_3 := CASE WHEN ARRAY_LENGTH(v_nombres, 1) >= 3
+                THEN POSITION(v_nombres[3] IN v_raiz::TEXT) > 0 ELSE FALSE END;
             INSERT INTO resultado_mediciones VALUES (
                 'C' || v_c, v_e, v_escenario, v_repeticion,
                 CASE WHEN v_repeticion <= 2 THEN 'calentamiento' ELSE 'medicion' END,
@@ -310,7 +309,7 @@ $consulta$;
                 COALESCE((v_raiz->>'Shared Read Blocks')::BIGINT, 0),
                 COALESCE((v_raiz->>'Temp Read Blocks')::BIGINT, 0),
                 COALESCE((v_raiz->>'Temp Written Blocks')::BIGINT, 0),
-                v_uso_1, v_uso_2, v_filas, v_firma
+                v_uso_1, v_uso_2, v_uso_3, v_filas, v_firma
             );
         END LOOP;
     END LOOP;
@@ -330,6 +329,7 @@ SELECT consulta, escala, escenario, COUNT(*) AS mediciones,
        ROUND(AVG(temp_written), 2) AS media_temp_written,
        COUNT(*) FILTER (WHERE uso_indice_1) AS usos_indice_1,
        COUNT(*) FILTER (WHERE uso_indice_2) AS usos_indice_2,
+       COUNT(*) FILTER (WHERE uso_indice_3) AS usos_indice_3,
        MIN(filas_resultado) AS filas
 FROM resultado_mediciones
 WHERE fase = 'medicion'
@@ -350,28 +350,36 @@ $verificacion$;
 
 \echo === EXPORTACION CSV ===
 SELECT
+    CASE WHEN current_setting('sismo.consulta')::INTEGER=1 AND current_setting('sismo.escala')::INTEGER=100 THEN 'true' ELSE 'false' END AS guardar_c1_100,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=1 AND current_setting('sismo.escala')::INTEGER=1000 THEN 'true' ELSE 'false' END AS guardar_c1_1000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=1 AND current_setting('sismo.escala')::INTEGER=10000 THEN 'true' ELSE 'false' END AS guardar_c1_10000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=1 AND current_setting('sismo.escala')::INTEGER=100000 THEN 'true' ELSE 'false' END AS guardar_c1_100000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=1 AND current_setting('sismo.escala')::INTEGER=1000000 THEN 'true' ELSE 'false' END AS guardar_c1_1000000,
+    CASE WHEN current_setting('sismo.consulta')::INTEGER=2 AND current_setting('sismo.escala')::INTEGER=100 THEN 'true' ELSE 'false' END AS guardar_c2_100,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=2 AND current_setting('sismo.escala')::INTEGER=1000 THEN 'true' ELSE 'false' END AS guardar_c2_1000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=2 AND current_setting('sismo.escala')::INTEGER=10000 THEN 'true' ELSE 'false' END AS guardar_c2_10000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=2 AND current_setting('sismo.escala')::INTEGER=100000 THEN 'true' ELSE 'false' END AS guardar_c2_100000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=2 AND current_setting('sismo.escala')::INTEGER=1000000 THEN 'true' ELSE 'false' END AS guardar_c2_1000000,
+    CASE WHEN current_setting('sismo.consulta')::INTEGER=3 AND current_setting('sismo.escala')::INTEGER=100 THEN 'true' ELSE 'false' END AS guardar_c3_100,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=3 AND current_setting('sismo.escala')::INTEGER=1000 THEN 'true' ELSE 'false' END AS guardar_c3_1000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=3 AND current_setting('sismo.escala')::INTEGER=10000 THEN 'true' ELSE 'false' END AS guardar_c3_10000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=3 AND current_setting('sismo.escala')::INTEGER=100000 THEN 'true' ELSE 'false' END AS guardar_c3_100000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=3 AND current_setting('sismo.escala')::INTEGER=1000000 THEN 'true' ELSE 'false' END AS guardar_c3_1000000,
+    CASE WHEN current_setting('sismo.consulta')::INTEGER=4 AND current_setting('sismo.escala')::INTEGER=100 THEN 'true' ELSE 'false' END AS guardar_c4_100,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=4 AND current_setting('sismo.escala')::INTEGER=1000 THEN 'true' ELSE 'false' END AS guardar_c4_1000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=4 AND current_setting('sismo.escala')::INTEGER=10000 THEN 'true' ELSE 'false' END AS guardar_c4_10000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=4 AND current_setting('sismo.escala')::INTEGER=100000 THEN 'true' ELSE 'false' END AS guardar_c4_100000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=4 AND current_setting('sismo.escala')::INTEGER=1000000 THEN 'true' ELSE 'false' END AS guardar_c4_1000000,
+    CASE WHEN current_setting('sismo.consulta')::INTEGER=5 AND current_setting('sismo.escala')::INTEGER=100 THEN 'true' ELSE 'false' END AS guardar_c5_100,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=5 AND current_setting('sismo.escala')::INTEGER=1000 THEN 'true' ELSE 'false' END AS guardar_c5_1000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=5 AND current_setting('sismo.escala')::INTEGER=10000 THEN 'true' ELSE 'false' END AS guardar_c5_10000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=5 AND current_setting('sismo.escala')::INTEGER=100000 THEN 'true' ELSE 'false' END AS guardar_c5_100000,
     CASE WHEN current_setting('sismo.consulta')::INTEGER=5 AND current_setting('sismo.escala')::INTEGER=1000000 THEN 'true' ELSE 'false' END AS guardar_c5_1000000
 \gset
 
+\if :guardar_c1_100
+\copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C1_100.csv' WITH (FORMAT csv, HEADER true)
+\endif
 \if :guardar_c1_1000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C1_1000.csv' WITH (FORMAT csv, HEADER true)
 \endif
@@ -383,6 +391,9 @@ SELECT
 \endif
 \if :guardar_c1_1000000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C1_1000000.csv' WITH (FORMAT csv, HEADER true)
+\endif
+\if :guardar_c2_100
+\copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C2_100.csv' WITH (FORMAT csv, HEADER true)
 \endif
 \if :guardar_c2_1000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C2_1000.csv' WITH (FORMAT csv, HEADER true)
@@ -396,6 +407,9 @@ SELECT
 \if :guardar_c2_1000000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C2_1000000.csv' WITH (FORMAT csv, HEADER true)
 \endif
+\if :guardar_c3_100
+\copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C3_100.csv' WITH (FORMAT csv, HEADER true)
+\endif
 \if :guardar_c3_1000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C3_1000.csv' WITH (FORMAT csv, HEADER true)
 \endif
@@ -408,6 +422,9 @@ SELECT
 \if :guardar_c3_1000000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C3_1000000.csv' WITH (FORMAT csv, HEADER true)
 \endif
+\if :guardar_c4_100
+\copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C4_100.csv' WITH (FORMAT csv, HEADER true)
+\endif
 \if :guardar_c4_1000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C4_1000.csv' WITH (FORMAT csv, HEADER true)
 \endif
@@ -419,6 +436,9 @@ SELECT
 \endif
 \if :guardar_c4_1000000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C4_1000000.csv' WITH (FORMAT csv, HEADER true)
+\endif
+\if :guardar_c5_100
+\copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C5_100.csv' WITH (FORMAT csv, HEADER true)
 \endif
 \if :guardar_c5_1000
 \copy (SELECT * FROM resultado_mediciones ORDER BY CASE escenario WHEN 'sin_indice' THEN 1 ELSE 2 END, repeticion) TO 'resultados/06_C5_1000.csv' WITH (FORMAT csv, HEADER true)

@@ -44,8 +44,7 @@ $$;
 BEGIN;
 SET LOCAL search_path TO monitoreo_sismologico, public;
 
--- 1. Actividad y validez de lecturas para cada sensor.
--- LEFT JOIN conserva sensores que aun no tienen lecturas.
+-- 1. Actividad de sensores
 CREATE OR REPLACE VIEW vw_sensores_actividad AS
 SELECT
     s.id_sensor,
@@ -75,8 +74,7 @@ LEFT JOIN (
     GROUP BY id_sensor
 ) l ON l.id_sensor = s.id_sensor;
 
--- 2. Cobertura y lecturas por estacion.
--- Se agregan sensores ya resumidos para no multiplicar lecturas por JOIN.
+-- 2. Cobertura por estacion
 CREATE OR REPLACE VIEW vw_estaciones_resumen AS
 SELECT
     e.id_estacion,
@@ -95,7 +93,7 @@ FROM estacion_sismica e
 LEFT JOIN vw_sensores_actividad sa ON sa.id_estacion = e.id_estacion
 GROUP BY e.id_estacion, e.codigo, e.nombre, e.departamento, e.estado;
 
--- 3. Seguimiento de eventos con recuentos independientes.
+-- 3. Seguimiento de eventos
 CREATE OR REPLACE VIEW vw_eventos_seguimiento AS
 SELECT
     ev.id_evento,
@@ -127,8 +125,7 @@ LEFT JOIN (
     GROUP BY id_evento
 ) a ON a.id_evento = ev.id_evento;
 
--- 4. Detalle de alertas y tiempo transcurrido desde el origen.
--- La resta de TIMESTAMP produce un INTERVAL (no segundos numericos).
+-- 4. Detalle de alertas
 CREATE OR REPLACE VIEW vw_alertas_detalle AS
 SELECT
     a.id_alerta,
@@ -146,8 +143,7 @@ SELECT
 FROM alerta a
 JOIN vw_eventos_seguimiento ev ON ev.id_evento = a.id_evento;
 
--- 5. Resumen mensual exclusivo del catalogo oficial importado del IGP.
--- TIMESTAMP se interpreta como UTC porque esa fue la zona de la fuente.
+-- 5. Resumen mensual IGP
 CREATE OR REPLACE VIEW vw_igp_resumen_mensual AS
 SELECT
     DATE_TRUNC('month', fecha_hora_origen)::DATE AS mes_utc,
@@ -180,7 +176,7 @@ COMMIT;
 \echo '=== VERIFICACION DE VISTAS ==='
 SET search_path TO monitoreo_sismologico, public;
 
--- A. Existencia y cardinalidad de cuatro vistas de detalle.
+-- A. Vistas
 WITH recuentos AS (
     SELECT 'vw_alertas_detalle'::TEXT AS vista, 29::BIGINT AS esperado,
            (SELECT COUNT(*) FROM vw_alertas_detalle) AS encontrado
@@ -199,7 +195,7 @@ SELECT vista, esperado, encontrado,
 FROM recuentos
 ORDER BY vista;
 
--- B. Sumas derivadas: no se deben multiplicar filas al combinar relaciones.
+-- B. Totales
 SELECT
     (SELECT SUM(total_sensores) FROM vw_estaciones_resumen) AS sensores_por_estacion,
     (SELECT SUM(total_lecturas) FROM vw_estaciones_resumen) AS lecturas_por_estacion,
@@ -208,9 +204,8 @@ SELECT
     (SELECT SUM(total_detecciones) FROM vw_eventos_seguimiento) AS detecciones_por_evento,
     (SELECT SUM(total_alertas) FROM vw_eventos_seguimiento) AS alertas_por_evento;
 
--- Esperado: 40, 1190, 1113, 77, 104, 29.
 
--- C. Procedencia tecnica del evento y detecciones/alertas asociadas.
+-- C. Procedencia de eventos
 SELECT procedencia, COUNT(*) AS eventos,
        SUM(total_detecciones) AS detecciones,
        SUM(total_alertas) AS alertas
@@ -218,25 +213,23 @@ FROM vw_eventos_seguimiento
 GROUP BY procedencia
 ORDER BY procedencia;
 
--- Esperado: 'igp' 24289 / 0 / 0; 'simulado' 38 / 104 / 29.
 
--- D. Resumen mensual, sin asumir una cifra fija de meses con eventos.
+-- D. Resumen mensual
 SELECT COUNT(*) AS meses_con_eventos,
        SUM(total_eventos) AS eventos_igp,
        MIN(mes_utc) AS primer_mes_utc,
        MAX(mes_utc) AS ultimo_mes_utc
 FROM vw_igp_resumen_mensual;
 
--- Esperado: 24289 eventos; primer mes 1960-01-01, ultimo 2025-12-01.
 
--- E. Cinco alertas como ejemplo. Las vistas no garantizan orden por si solas.
+-- E. Alertas
 SELECT id_alerta, id_evento, procedencia, nivel,
        fecha_hora_emision, tiempo_desde_origen, sensores_detectores
 FROM vw_alertas_detalle
 ORDER BY fecha_hora_emision, id_alerta
 LIMIT 5;
 
--- F. Verificacion estricta; si algo difiere se obtiene ERROR (sin borrar datos).
+-- F. Verificacion de vistas
 DO $$
 BEGIN
     IF (SELECT COUNT(*) FROM information_schema.views
@@ -281,8 +274,7 @@ $$;
 BEGIN;
 SET LOCAL search_path TO monitoreo_sismologico, public;
 
--- P1. Registrar conjuntamente una estacion y su primer sensor.
--- Evita dejar una estacion sin sensores durante el alta por esta interfaz.
+-- P1. Registrar estacion y sensor
 CREATE OR REPLACE PROCEDURE sp_registrar_estacion_sensor(
     IN p_id_estacion INTEGER,
     IN p_codigo VARCHAR,
@@ -331,7 +323,7 @@ BEGIN
 END;
 $$;
 
--- P2. Registrar un evento sismico, sin fabricar atributos opcionales.
+-- P2. Registrar evento
 CREATE OR REPLACE PROCEDURE sp_registrar_evento(
     IN p_id_evento INTEGER,
     IN p_fecha_hora_origen TIMESTAMP,
@@ -359,9 +351,7 @@ BEGIN
 END;
 $$;
 
--- P3. Registrar una lectura. Solo admite nuevas lecturas validas
--- cuando el sensor se encuentra operativo en ese instante.
--- FOR SHARE evita un cambio concurrente de estado durante esta comprobacion.
+-- P3. Registrar lectura
 CREATE OR REPLACE PROCEDURE sp_registrar_lectura(
     IN p_id_lectura BIGINT,
     IN p_id_sensor INTEGER,
@@ -402,9 +392,7 @@ BEGIN
 END;
 $$;
 
--- P4. Registrar una deteccion sustentada por una lectura valida.
--- Se exige coincidencia de sensor y hora; el modelo no posee id_lectura
--- en DETECCION, por lo que este control es procedimental y no una FK.
+-- P4. Registrar deteccion
 CREATE OR REPLACE PROCEDURE sp_registrar_deteccion(
     IN p_id_sensor INTEGER,
     IN p_id_evento INTEGER,
@@ -451,9 +439,7 @@ BEGIN
 END;
 $$;
 
--- P5. Emitir una alerta para un evento existente.
--- No exige una deteccion: el modelo permite alertas para un evento
--- sin imponer un numero minimo de detecciones.
+-- P5. Emitir alerta
 CREATE OR REPLACE PROCEDURE sp_emitir_alerta(
     IN p_id_alerta INTEGER,
     IN p_id_evento INTEGER,
@@ -498,9 +484,7 @@ BEGIN
 END;
 $$;
 
--- P6. Actualizar estado y ultimo mantenimiento de un sensor.
--- NULL en la fecha elimina la ultima fecha (no implica nuevo mantenimiento).
--- El CHECK existente valida que no sea anterior a la instalacion.
+-- P6. Actualizar estado del sensor
 CREATE OR REPLACE PROCEDURE sp_actualizar_estado_sensor(
     IN p_id_sensor INTEGER,
     IN p_estado VARCHAR,
@@ -568,7 +552,7 @@ BEGIN
 END;
 $$;
 
--- 1. Altas validas: estacion + sensor, evento, lectura, deteccion y alerta.
+-- 1. Registro de prueba
 CALL sp_registrar_estacion_sensor(
     930450001, 'TEST45-EST-01', 'Estacion de prueba transaccional',
     -12.05, -77.04, 'operativa',
@@ -600,13 +584,11 @@ CALL sp_actualizar_estado_sensor(
     930450001, 'mantenimiento', DATE '2026-08-05'
 );
 
--- 2. Verificaciones negativas. Cada bloque con EXCEPTION se revierte
--- parcialmente sin comprometer la transaccion principal.
+-- 2. Pruebas de validacion
 DO $$
 DECLARE
     v_rechazos INTEGER := 0;
 BEGIN
-    -- Nueva lectura valida con sensor en mantenimiento: rechazo esperado.
     BEGIN
         CALL sp_registrar_lectura(
             930450000002, 930450001, TIMESTAMP '2026-08-02 00:00:11',
@@ -620,7 +602,6 @@ BEGIN
         RAISE EXCEPTION 'No se rechazo la lectura valida de un sensor en mantenimiento';
     END IF;
 
-    -- Deteccion sin lectura valida en la hora: rechazo esperado.
     BEGIN
         CALL sp_registrar_deteccion(
             930450001, 930450001, TIMESTAMP '2026-08-02 00:00:12',
@@ -634,7 +615,6 @@ BEGIN
         RAISE EXCEPTION 'No se rechazo la deteccion sin lectura valida';
     END IF;
 
-    -- Segunda deteccion del mismo par sensor-evento: rechazo por PK.
     BEGIN
         CALL sp_registrar_deteccion(
             930450001, 930450001, TIMESTAMP '2026-08-02 00:00:10',
@@ -647,7 +627,6 @@ BEGIN
         RAISE EXCEPTION 'No se rechazo la deteccion duplicada';
     END IF;
 
-    -- Emision de alerta anterior al evento: rechazo esperado.
     BEGIN
         CALL sp_emitir_alerta(
             930450002, 930450001, TIMESTAMP '2026-08-01 23:59:59',
@@ -661,7 +640,6 @@ BEGIN
         RAISE EXCEPTION 'No se rechazo la alerta anterior al evento';
     END IF;
 
-    -- Fecha de mantenimiento anterior a instalacion: rechazo por CHECK.
     BEGIN
         CALL sp_actualizar_estado_sensor(
             930450001, 'mantenimiento', DATE '2026-06-01'
@@ -673,7 +651,6 @@ BEGIN
         RAISE EXCEPTION 'No se rechazo el mantenimiento anterior a la instalacion';
     END IF;
 
-    -- Lecturas invalidas se pueden conservar en estado de mantenimiento.
     CALL sp_registrar_lectura(
         930450000003, 930450001, TIMESTAMP '2026-08-02 00:00:13',
         'X', 0.22, FALSE
@@ -703,7 +680,6 @@ ORDER BY control;
 
 ROLLBACK;
 
--- Comprobar que la prueba no haya dejado registros persistidos.
 SELECT 'estaciones_prueba' AS control, COUNT(*) AS restantes
 FROM monitoreo_sismologico.estacion_sismica WHERE id_estacion = 930450001
 UNION ALL SELECT 'sensores_prueba', COUNT(*) FROM monitoreo_sismologico.sensor WHERE id_sensor = 930450001
@@ -715,13 +691,10 @@ ORDER BY control;
 
 
 \echo '=== TRIGGERS ==='
--- No inserta, modifica ni borra registros de las seis tablas base.
 BEGIN;
 SET LOCAL search_path TO monitoreo_sismologico, public;
 
--- T1. Una lectura nueva o reasignada solo puede marcarse valida
--- si su sensor se encuentra operativo. No se invalidan lecturas
--- historicas cuando el estado del sensor cambia posteriormente.
+-- T1. Validar lecturas
 CREATE OR REPLACE FUNCTION fn_trg_lectura_operativa()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -754,9 +727,7 @@ ON lectura_onda
 FOR EACH ROW
 EXECUTE FUNCTION fn_trg_lectura_operativa();
 
--- T2. Al actualizar o eliminar una lectura que sustentaba una
--- deteccion, debe quedar otra lectura valida con igual sensor y hora.
--- El identificador de lectura no forma parte de DETECCION.
+-- T2. Proteger detecciones
 CREATE OR REPLACE FUNCTION fn_trg_proteger_sustento()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -776,7 +747,6 @@ BEGIN
         END IF;
     END IF;
 
-    -- Bloquea la deteccion mientras se comprueba su sustento.
     PERFORM 1
     FROM deteccion
     WHERE id_sensor = OLD.id_sensor
@@ -805,8 +775,7 @@ ON lectura_onda
 FOR EACH ROW
 EXECUTE FUNCTION fn_trg_proteger_sustento();
 
--- T3. Las detecciones directas deben tener hora >= origen y
--- una lectura valida del mismo sensor y hora exacta.
+-- T3. Validar detecciones
 CREATE OR REPLACE FUNCTION fn_trg_deteccion_valida()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -848,7 +817,7 @@ ON deteccion
 FOR EACH ROW
 EXECUTE FUNCTION fn_trg_deteccion_valida();
 
--- T4. No se emiten alertas anteriores al origen de su evento.
+-- T4. Validar alertas
 CREATE OR REPLACE FUNCTION fn_trg_alerta_temporal()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -878,8 +847,7 @@ ON alerta
 FOR EACH ROW
 EXECUTE FUNCTION fn_trg_alerta_temporal();
 
--- T5. Una revision del origen no puede dejar detecciones ni
--- alertas ya asociadas con una hora anterior al nuevo origen.
+-- T5. Validar cambios de origen
 CREATE OR REPLACE FUNCTION fn_trg_revisar_origen_evento()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -909,8 +877,7 @@ ON evento_sismico
 FOR EACH ROW
 EXECUTE FUNCTION fn_trg_revisar_origen_evento();
 
--- T6. Serializa traslados y bajas de sensores de una estacion
--- mediante un bloqueo sobre la fila de su estacion de origen.
+-- T6. Validar traslados de sensores
 CREATE OR REPLACE FUNCTION fn_trg_bloquear_estacion_origen()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -938,10 +905,7 @@ ON sensor
 FOR EACH ROW
 EXECUTE FUNCTION fn_trg_bloquear_estacion_origen();
 
--- T7. Participacion minima: cada estacion existente posee
--- al menos un sensor al verificar restricciones diferidas.
--- Asi se admite INSERT estacion seguido de INSERT sensor
--- en la misma transaccion, pero se rechaza dejarla vacia.
+-- T7. Validar estaciones
 CREATE OR REPLACE FUNCTION fn_trg_estacion_con_sensor()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -961,7 +925,6 @@ BEGIN
         END IF;
     END IF;
 
-    -- La estacion puede haber sido eliminada en esta misma transaccion.
     IF EXISTS (
         SELECT 1 FROM estacion_sismica WHERE id_estacion = v_id_estacion
     ) AND NOT EXISTS (
@@ -994,7 +957,7 @@ DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW
 EXECUTE FUNCTION fn_trg_estacion_con_sensor();
 
--- Verificacion estructural previa: datos ya existentes.
+-- Verificacion de estructura
 DO $$
 BEGIN
     IF EXISTS (
@@ -1085,7 +1048,7 @@ BEGIN
 END;
 $$;
 
--- 1. Escenario positivo: inserciones SQL directas (sin CALL).
+-- 1. Inserciones de prueba
 INSERT INTO estacion_sismica (
     id_estacion, codigo, nombre, latitud, longitud, fecha_instalacion, estado
 ) VALUES
@@ -1131,7 +1094,6 @@ INSERT INTO alerta (
     'preventiva', 'Alerta de prueba no destinada a difusion', 4.2, 'simulada'
 );
 
--- Las lecturas validas existentes no cambian si el sensor pasa a mantenimiento.
 UPDATE sensor SET estado = 'mantenimiento' WHERE id_sensor = 930460001;
 INSERT INTO lectura_onda (
     id_lectura, id_sensor, fecha_hora, canal, valor, es_valida
@@ -1139,12 +1101,11 @@ INSERT INTO lectura_onda (
     930460000002, 930460001, TIMESTAMP '2026-08-02 00:00:11', 'X', 0.20, FALSE
 );
 
--- 2. Nueve rechazos esperados: se capturan en subtransacciones.
+-- 2. Pruebas de restricciones
 DO $$
 DECLARE
     v_rechazos INTEGER := 0;
 BEGIN
-    -- Caso 1: el sensor en mantenimiento no genera otra lectura valida.
     BEGIN
         INSERT INTO lectura_onda (id_lectura, id_sensor, fecha_hora, canal, valor, es_valida)
         VALUES (930460000003, 930460001, TIMESTAMP '2026-08-02 00:00:12', 'X', 0.25, TRUE);
@@ -1154,7 +1115,6 @@ BEGIN
         v_rechazos := v_rechazos + 1;
     END;
 
-    -- Caso 2: deteccion sin lectura valida a esa hora.
     BEGIN
         INSERT INTO deteccion (id_sensor, id_evento, hora_deteccion, aceleracion_maxima, calidad)
         VALUES (930460002, 930460001, TIMESTAMP '2026-08-02 00:00:13', 0.19, 'media');
@@ -1164,7 +1124,6 @@ BEGIN
         v_rechazos := v_rechazos + 1;
     END;
 
-    -- Caso 3: alerta anterior al origen del evento.
     BEGIN
         INSERT INTO alerta (id_alerta, id_evento, fecha_hora_emision, nivel, mensaje, estado)
         VALUES (930460002, 930460001, TIMESTAMP '2026-08-01 23:59:59',
@@ -1175,7 +1134,6 @@ BEGIN
         v_rechazos := v_rechazos + 1;
     END;
 
-    -- Caso 4: no se puede invalidar el unico sustento de una deteccion.
     BEGIN
         UPDATE lectura_onda SET es_valida = FALSE WHERE id_lectura = 930460000001;
         RAISE EXCEPTION 'No se rechazo la invalidacion de lectura sustentadora';
@@ -1184,7 +1142,6 @@ BEGIN
         v_rechazos := v_rechazos + 1;
     END;
 
-    -- Caso 5: tampoco se puede borrar ese unico sustento.
     BEGIN
         DELETE FROM lectura_onda WHERE id_lectura = 930460000001;
         RAISE EXCEPTION 'No se rechazo el borrado de lectura sustentadora';
@@ -1193,7 +1150,6 @@ BEGIN
         v_rechazos := v_rechazos + 1;
     END;
 
-    -- Caso 6: una correccion de origen no debe invalidar detecciones previas.
     BEGIN
         UPDATE evento_sismico
         SET fecha_hora_origen = TIMESTAMP '2026-08-02 00:00:11'
@@ -1204,7 +1160,6 @@ BEGIN
         v_rechazos := v_rechazos + 1;
     END;
 
-    -- Caso 7: una nueva estacion no puede quedar sin sensores al validar.
     BEGIN
         INSERT INTO estacion_sismica (
             id_estacion, codigo, nombre, latitud, longitud, estado
@@ -1216,7 +1171,6 @@ BEGIN
         v_rechazos := v_rechazos + 1;
     END;
 
-    -- Caso 8: no se puede eliminar el unico sensor de una estacion.
     BEGIN
         DELETE FROM sensor WHERE id_sensor = 930460002;
         SET CONSTRAINTS ALL IMMEDIATE;
@@ -1226,7 +1180,6 @@ BEGIN
         v_rechazos := v_rechazos + 1;
     END;
 
-    -- Caso 9: tampoco puede trasladarse el unico sensor de una estacion.
     BEGIN
         UPDATE sensor SET id_estacion = 930460001 WHERE id_sensor = 930460002;
         SET CONSTRAINTS ALL IMMEDIATE;
@@ -1265,7 +1218,6 @@ ORDER BY control;
 
 ROLLBACK;
 
--- Confirmar que todos los IDs reservados siguen libres tras las pruebas.
 SELECT 'estaciones_prueba' AS control, COUNT(*) AS restantes
 FROM monitoreo_sismologico.estacion_sismica WHERE id_estacion BETWEEN 930460001 AND 930460099
 UNION ALL SELECT 'sensores_prueba', COUNT(*) FROM monitoreo_sismologico.sensor WHERE id_sensor BETWEEN 930460001 AND 930460099
@@ -1287,7 +1239,6 @@ FROM (
 
 
 \echo '=== CONSULTAS C1-C5 ==='
--- 5.1 - Cinco consultas SQL intermedias para la experimentacion
 
 SET search_path TO monitoreo_sismologico, public;
 
@@ -1310,7 +1261,6 @@ ORDER BY anio_utc;
 
 \echo
 \echo CONSULTA 2. Sismos IGP cercanos por ventana rectangular a estaciones
--- Ventana de +/- 1.5 grados latitud/longitud; NO es una distancia geodesica.
 SELECT
     e.id_estacion,
     e.codigo AS codigo_estacion,
@@ -1352,67 +1302,60 @@ HAVING COUNT(*) >= 10
 ORDER BY porcentaje_invalidas DESC, total_lecturas DESC, e.id_estacion;
 
 \echo
-\echo CONSULTA 4. Tiempo a primera deteccion y primera alerta en eventos simulados
-WITH detecciones_resumen AS (
-    SELECT id_evento, COUNT(*) AS total_detecciones,
-           MIN(hora_deteccion) AS primera_deteccion
-    FROM deteccion
-    GROUP BY id_evento
-), alertas_resumen AS (
-    SELECT id_evento, COUNT(*) AS total_alertas,
-           MIN(fecha_hora_emision) AS primera_alerta
-    FROM alerta
-    GROUP BY id_evento
-)
-SELECT
-    ev.id_evento,
-    ev.fecha_hora_origen,
-    ev.magnitud,
-    COALESCE(d.total_detecciones, 0) AS total_detecciones,
-    COALESCE(a.total_alertas, 0) AS total_alertas,
-    ROUND(EXTRACT(EPOCH FROM (d.primera_deteccion - ev.fecha_hora_origen))::NUMERIC, 2)
-        AS segundos_primera_deteccion,
-    ROUND(EXTRACT(EPOCH FROM (a.primera_alerta - ev.fecha_hora_origen))::NUMERIC, 2)
-        AS segundos_primera_alerta
+\echo CONSULTA 4. Tiempo a primera deteccion y alerta en eventos simulados (5 agosto 2026)
+SELECT ev.id_evento, ev.fecha_hora_origen, ev.magnitud,
+       d.total_detecciones, a.total_alertas,
+       ROUND(EXTRACT(EPOCH FROM
+           (d.primera_deteccion - ev.fecha_hora_origen))::NUMERIC, 2)
+           AS segundos_primera_deteccion,
+       ROUND(EXTRACT(EPOCH FROM
+           (a.primera_alerta - ev.fecha_hora_origen))::NUMERIC, 2)
+           AS segundos_primera_alerta
 FROM evento_sismico ev
-LEFT JOIN detecciones_resumen d ON d.id_evento = ev.id_evento
-LEFT JOIN alertas_resumen a ON a.id_evento = ev.id_evento
-WHERE (ev.id_evento BETWEEN 810000001 AND 810000008
-    OR ev.id_evento BETWEEN 820300001 AND 820300030)
-  AND (COALESCE(d.total_detecciones, 0) > 0
-    OR COALESCE(a.total_alertas, 0) > 0)
+LEFT JOIN LATERAL (
+    SELECT COUNT(*)::INTEGER AS total_detecciones,
+           MIN(hora_deteccion) AS primera_deteccion
+    FROM deteccion d
+    WHERE d.id_evento = ev.id_evento
+) d ON TRUE
+LEFT JOIN LATERAL (
+    SELECT COUNT(*)::INTEGER AS total_alertas,
+           MIN(fecha_hora_emision) AS primera_alerta
+    FROM alerta a
+    WHERE a.id_evento = ev.id_evento
+) a ON TRUE
+WHERE ev.estado_revision = 'simulado'
+  AND ev.fecha_hora_origen >= TIMESTAMP '2026-08-05 00:00:00'
+  AND ev.fecha_hora_origen < TIMESTAMP '2026-08-06 00:00:00'
+  AND (d.total_detecciones > 0 OR a.total_alertas > 0)
 ORDER BY ev.fecha_hora_origen DESC, ev.id_evento
 LIMIT 15;
 
 \echo
-\echo CONSULTA 5. Sensores con lecturas pero sin detecciones en agosto de 2026
--- Sin detecciones no equivale por si solo a sensor defectuoso.
-SELECT
-    s.id_sensor,
-    s.numero_serie,
-    e.codigo AS codigo_estacion,
-    s.estado AS estado_sensor,
-    COUNT(*) AS lecturas_periodo,
-    COUNT(*) FILTER (WHERE NOT l.es_valida) AS lecturas_invalidas,
-    MAX(l.fecha_hora) AS ultima_lectura
-FROM sensor s
+\echo CONSULTA 5. Sensores con lecturas y sin detecciones el 5 agosto 2026
+SELECT s.id_sensor, s.numero_serie, e.codigo AS codigo_estacion,
+       COUNT(*) AS lecturas_periodo,
+       COUNT(*) FILTER (WHERE NOT l.es_valida) AS lecturas_invalidas,
+       ROUND(AVG(ABS(l.valor)), 6) AS amplitud_media_absoluta,
+       MAX(l.fecha_hora) AS ultima_lectura
+FROM lectura_onda l
+JOIN sensor s ON s.id_sensor = l.id_sensor
 JOIN estacion_sismica e ON e.id_estacion = s.id_estacion
-JOIN lectura_onda l ON l.id_sensor = s.id_sensor
-WHERE l.fecha_hora >= TIMESTAMP '2026-08-01 00:00:00'
-  AND l.fecha_hora < TIMESTAMP '2026-09-01 00:00:00'
+WHERE l.fecha_hora >= TIMESTAMP '2026-08-05 00:00:00'
+  AND l.fecha_hora < TIMESTAMP '2026-08-06 00:00:00'
   AND NOT EXISTS (
-      SELECT 1
-      FROM deteccion d
+      SELECT 1 FROM deteccion d
       WHERE d.id_sensor = s.id_sensor
-        AND d.hora_deteccion >= TIMESTAMP '2026-08-01 00:00:00'
-        AND d.hora_deteccion < TIMESTAMP '2026-09-01 00:00:00'
+        AND d.hora_deteccion >= TIMESTAMP '2026-08-05 00:00:00'
+        AND d.hora_deteccion < TIMESTAMP '2026-08-06 00:00:00'
   )
-GROUP BY s.id_sensor, s.numero_serie, e.codigo, s.estado
-HAVING COUNT(*) >= 20
-ORDER BY lecturas_invalidas DESC, lecturas_periodo DESC, s.id_sensor
+GROUP BY s.id_sensor, s.numero_serie, e.codigo
+HAVING COUNT(*) >= 1
+ORDER BY lecturas_invalidas DESC,
+         lecturas_periodo DESC, s.id_sensor
 LIMIT 15;
 
-
+\echo
 \echo '=== VERIFICACION DE CONSULTAS ==='
 BEGIN;
 SET LOCAL search_path TO monitoreo_sismologico, public;
@@ -1482,64 +1425,58 @@ SELECT 3 AS numero, 'Calidad de lecturas por estacion'::TEXT AS consulta,
 UNION ALL
 SELECT 4 AS numero, 'Latencia de deteccion y alerta'::TEXT AS consulta,
        (SELECT COUNT(*) FROM (
-      WITH detecciones_resumen AS (
-          SELECT id_evento, COUNT(*) AS total_detecciones,
-                 MIN(hora_deteccion) AS primera_deteccion
-          FROM deteccion
-          GROUP BY id_evento
-      ), alertas_resumen AS (
-          SELECT id_evento, COUNT(*) AS total_alertas,
-                 MIN(fecha_hora_emision) AS primera_alerta
-          FROM alerta
-          GROUP BY id_evento
-      )
-      SELECT
-          ev.id_evento,
-          ev.fecha_hora_origen,
-          ev.magnitud,
-          COALESCE(d.total_detecciones, 0) AS total_detecciones,
-          COALESCE(a.total_alertas, 0) AS total_alertas,
-          ROUND(EXTRACT(EPOCH FROM (d.primera_deteccion - ev.fecha_hora_origen))::NUMERIC, 2)
-              AS segundos_primera_deteccion,
-          ROUND(EXTRACT(EPOCH FROM (a.primera_alerta - ev.fecha_hora_origen))::NUMERIC, 2)
-              AS segundos_primera_alerta
-      FROM evento_sismico ev
-      LEFT JOIN detecciones_resumen d ON d.id_evento = ev.id_evento
-      LEFT JOIN alertas_resumen a ON a.id_evento = ev.id_evento
-      WHERE (ev.id_evento BETWEEN 810000001 AND 810000008
-          OR ev.id_evento BETWEEN 820300001 AND 820300030)
-        AND (COALESCE(d.total_detecciones, 0) > 0
-          OR COALESCE(a.total_alertas, 0) > 0)
-      ORDER BY ev.fecha_hora_origen DESC, ev.id_evento
-      LIMIT 15
+SELECT ev.id_evento, ev.fecha_hora_origen, ev.magnitud,
+       d.total_detecciones, a.total_alertas,
+       ROUND(EXTRACT(EPOCH FROM
+           (d.primera_deteccion - ev.fecha_hora_origen))::NUMERIC, 2)
+           AS segundos_primera_deteccion,
+       ROUND(EXTRACT(EPOCH FROM
+           (a.primera_alerta - ev.fecha_hora_origen))::NUMERIC, 2)
+           AS segundos_primera_alerta
+FROM evento_sismico ev
+LEFT JOIN LATERAL (
+    SELECT COUNT(*)::INTEGER AS total_detecciones,
+           MIN(hora_deteccion) AS primera_deteccion
+    FROM deteccion d
+    WHERE d.id_evento = ev.id_evento
+) d ON TRUE
+LEFT JOIN LATERAL (
+    SELECT COUNT(*)::INTEGER AS total_alertas,
+           MIN(fecha_hora_emision) AS primera_alerta
+    FROM alerta a
+    WHERE a.id_evento = ev.id_evento
+) a ON TRUE
+WHERE ev.estado_revision = 'simulado'
+  AND ev.fecha_hora_origen >= TIMESTAMP '2026-08-05 00:00:00'
+  AND ev.fecha_hora_origen < TIMESTAMP '2026-08-06 00:00:00'
+  AND (d.total_detecciones > 0 OR a.total_alertas > 0)
+ORDER BY ev.fecha_hora_origen DESC, ev.id_evento
+LIMIT 15
        ) AS resultado) AS filas_obtenidas
 UNION ALL
-SELECT 5 AS numero, 'Sensores sin deteccion en agosto'::TEXT AS consulta,
+SELECT 5 AS numero, 'Sensores sin deteccion el 5 agosto'::TEXT AS consulta,
        (SELECT COUNT(*) FROM (
-      SELECT
-          s.id_sensor,
-          s.numero_serie,
-          e.codigo AS codigo_estacion,
-          s.estado AS estado_sensor,
-          COUNT(*) AS lecturas_periodo,
-          COUNT(*) FILTER (WHERE NOT l.es_valida) AS lecturas_invalidas,
-          MAX(l.fecha_hora) AS ultima_lectura
-      FROM sensor s
-      JOIN estacion_sismica e ON e.id_estacion = s.id_estacion
-      JOIN lectura_onda l ON l.id_sensor = s.id_sensor
-      WHERE l.fecha_hora >= TIMESTAMP '2026-08-01 00:00:00'
-        AND l.fecha_hora < TIMESTAMP '2026-09-01 00:00:00'
-        AND NOT EXISTS (
-            SELECT 1
-            FROM deteccion d
-            WHERE d.id_sensor = s.id_sensor
-              AND d.hora_deteccion >= TIMESTAMP '2026-08-01 00:00:00'
-              AND d.hora_deteccion < TIMESTAMP '2026-09-01 00:00:00'
-        )
-      GROUP BY s.id_sensor, s.numero_serie, e.codigo, s.estado
-      HAVING COUNT(*) >= 20
-      ORDER BY lecturas_invalidas DESC, lecturas_periodo DESC, s.id_sensor
-      LIMIT 15
+SELECT s.id_sensor, s.numero_serie, e.codigo AS codigo_estacion,
+       COUNT(*) AS lecturas_periodo,
+       COUNT(*) FILTER (WHERE NOT l.es_valida) AS lecturas_invalidas,
+       ROUND(AVG(ABS(l.valor)), 6) AS amplitud_media_absoluta,
+       MAX(l.fecha_hora) AS ultima_lectura
+FROM lectura_onda l
+JOIN sensor s ON s.id_sensor = l.id_sensor
+JOIN estacion_sismica e ON e.id_estacion = s.id_estacion
+WHERE l.fecha_hora >= TIMESTAMP '2026-08-05 00:00:00'
+  AND l.fecha_hora < TIMESTAMP '2026-08-06 00:00:00'
+  AND NOT EXISTS (
+      SELECT 1 FROM deteccion d
+      WHERE d.id_sensor = s.id_sensor
+        AND d.hora_deteccion >= TIMESTAMP '2026-08-05 00:00:00'
+        AND d.hora_deteccion < TIMESTAMP '2026-08-06 00:00:00'
+  )
+GROUP BY s.id_sensor, s.numero_serie, e.codigo
+HAVING COUNT(*) >= 1
+ORDER BY lecturas_invalidas DESC,
+         lecturas_periodo DESC, s.id_sensor
+LIMIT 15
        ) AS resultado) AS filas_obtenidas;
 
 SELECT numero, consulta, filas_obtenidas,

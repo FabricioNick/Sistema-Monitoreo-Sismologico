@@ -1,0 +1,493 @@
+Pager usage is off.
+Timing is off.
+ escala_valida 
+---------------
+             1
+(1 row)
+
+You are now connected to database "bd_sismologico_prueba_exp_1000000" as user "postgres".
+ escala  
+---------
+ 1000000
+(1 row)
+
+
+=== VALIDACION INICIAL ===
+psql:../sql/05_planes_indices.sql:69: NOTICE:  OK: 1000000 registros, 24289 eventos IGP y sin indices secundarios
+DO
+BEGIN
+SET
+CREATE TABLE
+
+=== C1: ACTIVIDAD SISMICA ANUAL ===
+SIN INDICE
+                                                                                                  QUERY PLAN                                                                                                   
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=1351.72..1352.26 rows=214 width=108) (actual time=7.440..7.441 rows=15.00 loops=1)
+   Sort Key: ((EXTRACT(year FROM fecha_hora_origen))::integer)
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=24268
+   ->  HashAggregate  (cost=1330.07..1343.44 rows=214 width=108) (actual time=7.404..7.418 rows=15.00 loops=1)
+         Group Key: (EXTRACT(year FROM fecha_hora_origen))::integer
+         Filter: (count(*) >= 1)
+         Batches: 1  Memory Usage: 57kB
+         Buffers: shared hit=24268
+         ->  Index Scan using pk_evento_sismico on evento_sismico ev  (cost=0.29..1322.04 rows=642 width=14) (actual time=4.250..7.046 rows=70.00 loops=1)
+               Index Cond: ((id_evento >= 200000000) AND (id_evento <= 299999999))
+               Filter: ((fecha_hora_origen >= '2010-01-01 00:00:00'::timestamp without time zone) AND (fecha_hora_origen < '2026-01-01 00:00:00'::timestamp without time zone) AND (magnitud >= '6'::numeric))
+               Rows Removed by Filter: 24219
+               Index Searches: 1
+               Buffers: shared hit=24268
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=54 read=9 dirtied=1
+ Planning Time: 1.154 ms
+ Execution Time: 7.667 ms
+(20 rows)
+
+INSERT 0 1
+INDICES CANDIDATOS
+CREATE INDEX
+ANALYZE
+CON INDICE
+                                                                                     QUERY PLAN                                                                                     
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=58.69..59.23 rows=215 width=108) (actual time=0.084..0.085 rows=15.00 loops=1)
+   Sort Key: ((EXTRACT(year FROM fecha_hora_origen))::integer)
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=1 read=2
+   ->  HashAggregate  (cost=36.94..50.36 rows=215 width=108) (actual time=0.067..0.075 rows=15.00 loops=1)
+         Group Key: (EXTRACT(year FROM fecha_hora_origen))::integer
+         Filter: (count(*) >= 1)
+         Batches: 1  Memory Usage: 57kB
+         Buffers: shared hit=1 read=2
+         ->  Index Only Scan using idx_ev_igp_m6_fecha on evento_sismico ev  (cost=0.27..28.89 rows=644 width=14) (actual time=0.033..0.043 rows=70.00 loops=1)
+               Index Cond: ((fecha_hora_origen >= '2010-01-01 00:00:00'::timestamp without time zone) AND (fecha_hora_origen < '2026-01-01 00:00:00'::timestamp without time zone))
+               Heap Fetches: 0
+               Index Searches: 1
+               Buffers: shared hit=1 read=2
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=54 read=1
+ Planning Time: 0.752 ms
+ Execution Time: 0.111 ms
+(19 rows)
+
+UPDATE 1
+DROP INDEX
+
+=== C2: VENTANAS GEOGRAFICAS ===
+SIN INDICE
+                                                                                                                      QUERY PLAN                                                                                                                      
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=5335.80..5335.82 rows=10 width=124) (actual time=45.537..48.894 rows=10.00 loops=1)
+   Buffers: shared hit=24303
+   ->  Sort  (cost=5335.80..5335.88 rows=33 width=124) (actual time=45.537..48.892 rows=10.00 loops=1)
+         Sort Key: (count(*)) DESC, e.id_estacion
+         Sort Method: top-N heapsort  Memory: 26kB
+         Buffers: shared hit=24303
+         ->  Finalize GroupAggregate  (cost=5312.00..5335.08 rows=33 width=124) (actual time=45.367..48.857 rows=100.00 loops=1)
+               Group Key: e.codigo
+               Filter: (count(*) >= 1)
+               Buffers: shared hit=24300
+               ->  Gather Merge  (cost=5312.00..5331.38 rows=170 width=124) (actual time=45.359..48.760 rows=200.00 loops=1)
+                     Workers Planned: 1
+                     Workers Launched: 1
+                     Buffers: shared hit=24300
+                     ->  Sort  (cost=4311.99..4312.24 rows=100 width=124) (actual time=29.138..29.143 rows=100.00 loops=2)
+                           Sort Key: e.codigo
+                           Sort Method: quicksort  Memory: 39kB
+                           Buffers: shared hit=24300
+                           Worker 0:  Sort Method: quicksort  Memory: 39kB
+                           ->  Partial HashAggregate  (cost=4307.42..4308.67 rows=100 width=124) (actual time=28.986..29.005 rows=100.00 loops=2)
+                                 Group Key: e.codigo
+                                 Batches: 1  Memory Usage: 96kB
+                                 Buffers: shared hit=24292
+                                 Worker 0:  Batches: 1  Memory Usage: 96kB
+                                 ->  Nested Loop  (cost=0.29..4295.47 rows=1195 width=58) (actual time=1.439..27.438 rows=8069.50 loops=2)
+                                       Join Filter: ((ev.latitud_epicentro >= (e.latitud - 1.5)) AND (ev.latitud_epicentro <= (e.latitud + 1.5)) AND (ev.longitud_epicentro >= (e.longitud - 1.5)) AND (ev.longitud_epicentro <= (e.longitud + 1.5)))
+                                       Rows Removed by Join Filter: 106530
+                                       Buffers: shared hit=24292
+                                       ->  Parallel Index Scan using pk_evento_sismico on evento_sismico ev  (cost=0.29..1146.22 rows=968 width=18) (actual time=0.928..3.677 rows=1146.00 loops=2)
+                                             Index Cond: ((id_evento >= 200000000) AND (id_evento <= 299999999))
+                                             Filter: ((fecha_hora_origen >= '2000-01-01 00:00:00'::timestamp without time zone) AND (fecha_hora_origen < '2026-01-01 00:00:00'::timestamp without time zone) AND (magnitud >= '5'::numeric))
+                                             Rows Removed by Filter: 10998
+                                             Index Searches: 1
+                                             Buffers: shared hit=24268
+                                       ->  Materialize  (cost=0.00..3.50 rows=100 width=64) (actual time=0.000..0.003 rows=100.00 loops=2292)
+                                             Storage: Memory  Maximum Storage: 26kB
+                                             Buffers: shared hit=24
+                                             ->  Seq Scan on estacion_sismica e  (cost=0.00..3.00 rows=100 width=64) (actual time=0.482..0.490 rows=100.00 loops=2)
+                                                   Buffers: shared hit=24
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=77
+ Planning Time: 0.864 ms
+ Execution Time: 48.971 ms
+(44 rows)
+
+INSERT 0 1
+INDICES CANDIDATOS
+CREATE INDEX
+ANALYZE
+CON INDICE
+                                                                                                         QUERY PLAN                                                                                                          
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=426.77..426.79 rows=10 width=124) (actual time=10.497..10.498 rows=10.00 loops=1)
+   Buffers: shared hit=399 read=12
+   ->  Sort  (cost=426.77..426.85 rows=33 width=124) (actual time=10.496..10.497 rows=10.00 loops=1)
+         Sort Key: (count(*)) DESC, e.id_estacion
+         Sort Method: top-N heapsort  Memory: 27kB
+         Buffers: shared hit=399 read=12
+         ->  HashAggregate  (cost=424.47..426.05 rows=33 width=124) (actual time=10.445..10.475 rows=100.00 loops=1)
+               Group Key: e.codigo
+               Filter: (count(*) >= 1)
+               Batches: 1  Memory Usage: 96kB
+               Buffers: shared hit=399 read=12
+               ->  Nested Loop  (cost=0.29..404.00 rows=2047 width=58) (actual time=0.076..8.044 rows=16139.00 loops=1)
+                     Buffers: shared hit=399 read=12
+                     ->  Seq Scan on estacion_sismica e  (cost=0.00..3.00 rows=100 width=64) (actual time=0.010..0.017 rows=100.00 loops=1)
+                           Buffers: shared hit=2
+                     ->  Index Only Scan using idx_ev_igp_geo_c2 on evento_sismico ev  (cost=0.29..3.81 rows=20 width=18) (actual time=0.025..0.071 rows=161.39 loops=100)
+                           Index Cond: ((latitud_epicentro >= (e.latitud - 1.5)) AND (latitud_epicentro <= (e.latitud + 1.5)) AND (longitud_epicentro >= (e.longitud - 1.5)) AND (longitud_epicentro <= (e.longitud + 1.5)))
+                           Heap Fetches: 0
+                           Index Searches: 100
+                           Buffers: shared hit=397 read=12
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=68 read=1
+ Planning Time: 1.016 ms
+ Execution Time: 10.535 ms
+(25 rows)
+
+UPDATE 1
+DROP INDEX
+
+=== C3: CALIDAD DE LECTURAS ===
+SIN INDICE
+                                                                                     QUERY PLAN                                                                                     
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=141701.80..141701.88 rows=33 width=83) (actual time=1192.776..1192.781 rows=100.00 loops=1)
+   Sort Key: (round(((100.0 * (count(*) FILTER (WHERE (NOT l.es_valida)))::numeric) / (NULLIF(count(*), 0))::numeric), 2)) DESC, (count(*)) DESC, e.id_estacion
+   Sort Method: quicksort  Memory: 32kB
+   Buffers: shared hit=100 read=6340, temp read=7501 written=7516
+   ->  GroupAggregate  (cost=128576.85..141700.97 rows=33 width=83) (actual time=1026.487..1192.652 rows=100.00 loops=1)
+         Group Key: e.codigo
+         Filter: (count(*) >= 10)
+         Buffers: shared hit=100 read=6340, temp read=7501 written=7516
+         ->  Sort  (cost=128576.85..130763.91 rows=874825 width=24) (actual time=1024.965..1109.561 rows=875000.00 loops=1)
+               Sort Key: e.codigo, s.id_sensor
+               Sort Method: external merge  Disk: 30032kB
+               Buffers: shared hit=100 read=6340, temp read=7501 written=7516
+               ->  Hash Join  (cost=15.00..24296.59 rows=874825 width=24) (actual time=0.378..250.416 rows=875000.00 loops=1)
+                     Hash Cond: (s.id_estacion = e.id_estacion)
+                     Buffers: shared hit=100 read=6340
+                     ->  Hash Join  (cost=10.75..21898.61 rows=874825 width=9) (actual time=0.342..157.689 rows=875000.00 loops=1)
+                           Hash Cond: (l.id_sensor = s.id_sensor)
+                           Buffers: shared hit=98 read=6340
+                           ->  Seq Scan on lectura_onda l  (cost=0.00..19559.00 rows=874825 width=5) (actual time=0.265..57.525 rows=875000.00 loops=1)
+                                 Filter: ((fecha_hora >= '2026-08-01 00:00:00'::timestamp without time zone) AND (fecha_hora < '2026-12-01 00:00:00'::timestamp without time zone))
+                                 Buffers: shared hit=94 read=6340
+                           ->  Hash  (cost=7.00..7.00 rows=300 width=8) (actual time=0.068..0.069 rows=300.00 loops=1)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 20kB
+                                 Buffers: shared hit=4
+                                 ->  Seq Scan on sensor s  (cost=0.00..7.00 rows=300 width=8) (actual time=0.022..0.046 rows=300.00 loops=1)
+                                       Buffers: shared hit=4
+                     ->  Hash  (cost=3.00..3.00 rows=100 width=19) (actual time=0.030..0.031 rows=100.00 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 13kB
+                           Buffers: shared hit=2
+                           ->  Seq Scan on estacion_sismica e  (cost=0.00..3.00 rows=100 width=19) (actual time=0.014..0.020 rows=100.00 loops=1)
+                                 Buffers: shared hit=2
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=42 read=8
+ Planning Time: 8.072 ms
+ Execution Time: 1201.771 ms
+(36 rows)
+
+INSERT 0 1
+INDICES CANDIDATOS
+CREATE INDEX
+ANALYZE
+CON INDICE
+                                                                                                   QUERY PLAN                                                                                                   
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=120036.29..120036.38 rows=33 width=83) (actual time=571.726..571.732 rows=100.00 loops=1)
+   Sort Key: (round(((100.0 * (count(*) FILTER (WHERE (NOT l.es_valida)))::numeric) / (NULLIF(count(*), 0))::numeric), 2)) DESC, (count(*)) DESC, e.id_estacion
+   Sort Method: quicksort  Memory: 32kB
+   Buffers: shared hit=889 read=4329
+   ->  GroupAggregate  (cost=982.17..120035.46 rows=33 width=83) (actual time=8.229..571.506 rows=100.00 loops=1)
+         Group Key: e.codigo
+         Filter: (count(*) >= 10)
+         Buffers: shared hit=889 read=4329
+         ->  Incremental Sort  (cost=982.17..109098.40 rows=874825 width=24) (actual time=2.338..443.733 rows=875000.00 loops=1)
+               Sort Key: e.codigo, s.id_sensor
+               Presorted Key: e.codigo
+               Full-sort Groups: 100  Sort Method: quicksort  Average Memory: 28kB  Peak Memory: 28kB
+               Pre-sorted Groups: 100  Sort Method: quicksort  Average Memory: 795kB  Peak Memory: 795kB
+               Buffers: shared hit=889 read=4329
+               ->  Nested Loop  (cost=0.57..40882.89 rows=874825 width=24) (actual time=0.036..232.781 rows=875000.00 loops=1)
+                     Buffers: shared hit=889 read=4329
+                     ->  Nested Loop  (cost=0.14..472.39 rows=300 width=23) (actual time=0.021..3.720 rows=300.00 loops=1)
+                           Join Filter: (e.id_estacion = s.id_estacion)
+                           Rows Removed by Join Filter: 29700
+                           Buffers: shared hit=7
+                           ->  Index Scan using uq_estacion_codigo on estacion_sismica e  (cost=0.14..14.64 rows=100 width=19) (actual time=0.005..0.219 rows=100.00 loops=1)
+                                 Index Searches: 1
+                                 Buffers: shared hit=3
+                           ->  Materialize  (cost=0.00..8.50 rows=300 width=8) (actual time=0.000..0.013 rows=300.00 loops=100)
+                                 Storage: Memory  Maximum Storage: 26kB
+                                 Buffers: shared hit=4
+                                 ->  Seq Scan on sensor s  (cost=0.00..7.00 rows=300 width=8) (actual time=0.009..0.033 rows=300.00 loops=1)
+                                       Buffers: shared hit=4
+                     ->  Index Only Scan using idx_lectura_sensor_fecha_c3 on lectura_onda l  (cost=0.42..105.54 rows=2916 width=5) (actual time=0.009..0.505 rows=2916.67 loops=300)
+                           Index Cond: ((id_sensor = s.id_sensor) AND (fecha_hora >= '2026-08-01 00:00:00'::timestamp without time zone) AND (fecha_hora < '2026-12-01 00:00:00'::timestamp without time zone))
+                           Heap Fetches: 0
+                           Index Searches: 300
+                           Buffers: shared hit=882 read=4329
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=30 read=6
+ Planning Time: 0.324 ms
+ Execution Time: 571.939 ms
+(38 rows)
+
+UPDATE 1
+DROP INDEX
+
+=== C4: SEGUIMIENTO DE DETECCIONES Y ALERTAS POR FECHA ===
+SIN INDICE
+                                                                                                                    QUERY PLAN                                                                                                                     
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=3814.60..6551.26 rows=15 width=90) (actual time=847.423..850.816 rows=15.00 loops=1)
+   Buffers: shared hit=137699
+   ->  Nested Loop Left Join  (cost=3814.60..293535.44 rows=1588 width=90) (actual time=847.422..850.812 rows=15.00 loops=1)
+         Filter: ((((count(*))::integer) > 0) OR (((count(*))::integer) > 0))
+         Rows Removed by Filter: 3154
+         Buffers: shared hit=137699
+         ->  Nested Loop Left Join  (cost=3783.84..205535.24 rows=2858 width=30) (actual time=30.061..622.984 rows=3169.00 loops=1)
+               Buffers: shared hit=83826
+               ->  Gather Merge  (cost=3713.36..4039.09 rows=2858 width=18) (actual time=29.825..30.736 rows=3169.00 loops=1)
+                     Workers Planned: 1
+                     Workers Launched: 1
+                     Buffers: shared hit=1432
+                     ->  Sort  (cost=2713.35..2717.56 rows=1681 width=18) (actual time=5.887..6.107 rows=1584.50 loops=2)
+                           Sort Key: ev.fecha_hora_origen DESC, ev.id_evento
+                           Sort Method: quicksort  Memory: 221kB
+                           Buffers: shared hit=1432
+                           Worker 0:  Sort Method: quicksort  Memory: 25kB
+                           ->  Parallel Seq Scan on evento_sismico ev  (cost=0.00..2623.29 rows=1681 width=18) (actual time=0.552..5.442 rows=1595.50 loops=2)
+                                 Filter: ((fecha_hora_origen >= '2026-08-05 00:00:00'::timestamp without time zone) AND (fecha_hora_origen < '2026-08-06 00:00:00'::timestamp without time zone) AND ((estado_revision)::text = 'simulado'::text))
+                                 Rows Removed by Filter: 58404
+                                 Buffers: shared hit=1388
+               ->  Aggregate  (cost=70.48..70.49 rows=1 width=12) (actual time=0.186..0.186 rows=1.00 loops=3169)
+                     Buffers: shared hit=82394
+                     ->  Seq Scan on deteccion d  (cost=0.00..69.75 rows=146 width=8) (actual time=0.183..0.183 rows=0.00 loops=3169)
+                           Filter: (id_evento = ev.id_evento)
+                           Rows Removed by Filter: 3500
+                           Buffers: shared hit=82394
+         ->  Aggregate  (cost=30.75..30.77 rows=1 width=12) (actual time=0.071..0.071 rows=1.00 loops=3169)
+               Buffers: shared hit=53873
+               ->  Seq Scan on alerta a  (cost=0.00..30.75 rows=1 width=8) (actual time=0.067..0.068 rows=0.00 loops=3169)
+                     Filter: (id_evento = ev.id_evento)
+                     Rows Removed by Filter: 1100
+                     Buffers: shared hit=53873
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=34
+ Planning Time: 0.998 ms
+ Execution Time: 850.935 ms
+(38 rows)
+
+INSERT 0 1
+INDICES CANDIDATOS
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+ANALYZE
+ANALYZE
+ANALYZE
+CON INDICE
+                                                                                           QUERY PLAN                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=47.68..518.84 rows=15 width=90) (actual time=9.235..9.238 rows=15.00 loops=1)
+   Buffers: shared hit=13771 read=25
+   ->  Incremental Sort  (cost=47.68..50116.65 rows=1594 width=90) (actual time=9.234..9.236 rows=15.00 loops=1)
+         Sort Key: ev.fecha_hora_origen DESC, ev.id_evento
+         Presorted Key: ev.fecha_hora_origen
+         Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 26kB  Peak Memory: 26kB
+         Buffers: shared hit=13771 read=25
+         ->  Nested Loop Left Join  (cost=16.28..50044.92 rows=1594 width=90) (actual time=9.102..9.219 rows=16.00 loops=1)
+               Filter: ((((count(*))::integer) > 0) OR (((count(*))::integer) > 0))
+               Rows Removed by Filter: 3154
+               Buffers: shared hit=13771 read=25
+               ->  Nested Loop Left Join  (cost=7.98..26121.08 rows=2870 width=30) (actual time=0.060..5.851 rows=3170.00 loops=1)
+                     Buffers: shared hit=7419 read=21
+                     ->  Index Scan Backward using idx_evento_fecha_c4 on evento_sismico ev  (cost=0.42..4344.96 rows=2870 width=18) (actual time=0.037..1.959 rows=3170.00 loops=1)
+                           Index Cond: ((fecha_hora_origen >= '2026-08-05 00:00:00'::timestamp without time zone) AND (fecha_hora_origen < '2026-08-06 00:00:00'::timestamp without time zone))
+                           Filter: ((estado_revision)::text = 'simulado'::text)
+                           Index Searches: 1
+                           Buffers: shared hit=1081 read=19
+                     ->  Aggregate  (cost=7.56..7.58 rows=1 width=12) (actual time=0.001..0.001 rows=1.00 loops=3170)
+                           Buffers: shared hit=6338 read=2
+                           ->  Index Only Scan using idx_deteccion_evento_hora_c4 on deteccion d  (cost=0.28..6.83 rows=146 width=8) (actual time=0.001..0.001 rows=0.00 loops=3170)
+                                 Index Cond: (id_evento = ev.id_evento)
+                                 Heap Fetches: 0
+                                 Index Searches: 3170
+                                 Buffers: shared hit=6338 read=2
+               ->  Aggregate  (cost=8.30..8.31 rows=1 width=12) (actual time=0.001..0.001 rows=1.00 loops=3170)
+                     Buffers: shared hit=6352 read=4
+                     ->  Index Only Scan using idx_alerta_evento_hora_c4 on alerta a  (cost=0.28..8.29 rows=1 width=8) (actual time=0.001..0.001 rows=0.01 loops=3170)
+                           Index Cond: (id_evento = ev.id_evento)
+                           Heap Fetches: 16
+                           Index Searches: 3170
+                           Buffers: shared hit=6352 read=4
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=52 read=3
+ Planning Time: 0.257 ms
+ Execution Time: 9.279 ms
+(37 rows)
+
+UPDATE 1
+DROP INDEX
+DROP INDEX
+DROP INDEX
+
+=== C5: SENSORES SIN DETECCIONES EN UNA VENTANA DE LECTURAS ===
+SIN INDICE
+                                                                                               QUERY PLAN                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=9427.66..9427.70 rows=15 width=90) (actual time=109.598..109.603 rows=15.00 loops=1)
+   Buffers: shared hit=657 read=957
+   ->  Sort  (cost=9427.66..9439.90 rows=4897 width=90) (actual time=109.597..109.601 rows=15.00 loops=1)
+         Sort Key: (count(*) FILTER (WHERE (NOT l.es_valida))) DESC, (count(*)) DESC, s.id_sensor
+         Sort Method: top-N heapsort  Memory: 28kB
+         Buffers: shared hit=657 read=957
+         ->  HashAggregate  (cost=9074.92..9307.52 rows=4897 width=90) (actual time=109.483..109.562 rows=150.00 loops=1)
+               Group Key: s.numero_serie, e.codigo
+               Filter: (count(*) >= 1)
+               Batches: 1  Memory Usage: 369kB
+               Buffers: shared hit=657 read=957
+               ->  Hash Join  (cost=1680.32..8817.85 rows=14690 width=47) (actual time=98.110..106.604 rows=14700.00 loops=1)
+                     Hash Cond: (s.id_estacion = e.id_estacion)
+                     Buffers: shared hit=657 read=957
+                     ->  Hash Join  (cost=1676.07..8773.40 rows=14690 width=36) (actual time=98.076..102.889 rows=14700.00 loops=1)
+                           Hash Cond: (l.id_sensor = s.id_sensor)
+                           Buffers: shared hit=655 read=957
+                           ->  Bitmap Heap Scan on lectura_onda l  (cost=1583.73..8430.88 rows=27543 width=17) (actual time=97.801..99.941 rows=29400.00 loops=1)
+                                 Recheck Cond: ((fecha_hora >= '2026-08-05 00:00:00'::timestamp without time zone) AND (fecha_hora < '2026-08-06 00:00:00'::timestamp without time zone))
+                                 Heap Blocks: exact=312
+                                 Buffers: shared hit=625 read=957
+                                 ->  Bitmap Index Scan on uq_lectura_sensor_fecha_canal  (cost=0.00..1576.85 rows=27543 width=0) (actual time=97.720..97.721 rows=29400.00 loops=1)
+                                       Index Cond: ((fecha_hora >= '2026-08-05 00:00:00'::timestamp without time zone) AND (fecha_hora < '2026-08-06 00:00:00'::timestamp without time zone))
+                                       Index Searches: 304
+                                       Buffers: shared hit=590 read=680
+                           ->  Hash  (cost=90.34..90.34 rows=160 width=23) (actual time=0.221..0.223 rows=150.00 loops=1)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 17kB
+                                 Buffers: shared hit=30
+                                 ->  Hash Right Anti Join  (cost=10.75..90.34 rows=160 width=23) (actual time=0.194..0.209 rows=150.00 loops=1)
+                                       Hash Cond: (d.id_sensor = s.id_sensor)
+                                       Buffers: shared hit=30
+                                       ->  Seq Scan on deteccion d  (cost=0.00..78.50 rows=140 width=4) (actual time=0.023..0.130 rows=150.00 loops=1)
+                                             Filter: ((hora_deteccion >= '2026-08-05 00:00:00'::timestamp without time zone) AND (hora_deteccion < '2026-08-06 00:00:00'::timestamp without time zone))
+                                             Rows Removed by Filter: 3350
+                                             Buffers: shared hit=26
+                                       ->  Hash  (cost=7.00..7.00 rows=300 width=23) (actual time=0.051..0.052 rows=300.00 loops=1)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 25kB
+                                             Buffers: shared hit=4
+                                             ->  Seq Scan on sensor s  (cost=0.00..7.00 rows=300 width=23) (actual time=0.005..0.028 rows=300.00 loops=1)
+                                                   Buffers: shared hit=4
+                     ->  Hash  (cost=3.00..3.00 rows=100 width=19) (actual time=0.027..0.028 rows=100.00 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 14kB
+                           Buffers: shared hit=2
+                           ->  Seq Scan on estacion_sismica e  (cost=0.00..3.00 rows=100 width=19) (actual time=0.010..0.016 rows=100.00 loops=1)
+                                 Buffers: shared hit=2
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=48 read=3
+ Planning Time: 1.886 ms
+ Execution Time: 109.796 ms
+(50 rows)
+
+INSERT 0 1
+INDICES CANDIDATOS
+CREATE INDEX
+CREATE INDEX
+ANALYZE
+ANALYZE
+CON INDICE
+                                                                                               QUERY PLAN                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=2447.29..2447.33 rows=15 width=90) (actual time=13.825..13.834 rows=15.00 loops=1)
+   Buffers: shared hit=33 read=148
+   ->  Sort  (cost=2447.29..2461.99 rows=5879 width=90) (actual time=13.824..13.832 rows=15.00 loops=1)
+         Sort Key: (count(*) FILTER (WHERE (NOT l.es_valida))) DESC, (count(*)) DESC, s.id_sensor
+         Sort Method: top-N heapsort  Memory: 28kB
+         Buffers: shared hit=33 read=148
+         ->  HashAggregate  (cost=2023.81..2303.05 rows=5879 width=90) (actual time=13.654..13.778 rows=150.00 loops=1)
+               Group Key: s.numero_serie, e.codigo
+               Filter: (count(*) >= 1)
+               Batches: 1  Memory Usage: 625kB
+               Buffers: shared hit=33 read=148
+               ->  Hash Join  (cost=97.46..1715.18 rows=17636 width=47) (actual time=0.337..9.274 rows=14700.00 loops=1)
+                     Hash Cond: (l.id_sensor = s.id_sensor)
+                     Buffers: shared hit=33 read=148
+                     ->  Index Only Scan using idx_lectura_fecha_sensor_c5 on lectura_onda l  (cost=0.42..1317.79 rows=33068 width=17) (actual time=0.041..5.283 rows=29400.00 loops=1)
+                           Index Cond: ((fecha_hora >= '2026-08-05 00:00:00'::timestamp without time zone) AND (fecha_hora < '2026-08-06 00:00:00'::timestamp without time zone))
+                           Heap Fetches: 0
+                           Index Searches: 1
+                           Buffers: shared hit=1 read=148
+                     ->  Hash  (cost=95.03..95.03 rows=160 width=34) (actual time=0.266..0.272 rows=150.00 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 18kB
+                           Buffers: shared hit=32
+                           ->  Hash Join  (cost=15.00..95.03 rows=160 width=34) (actual time=0.224..0.258 rows=150.00 loops=1)
+                                 Hash Cond: (s.id_estacion = e.id_estacion)
+                                 Buffers: shared hit=32
+                                 ->  Hash Right Anti Join  (cost=10.75..90.34 rows=160 width=23) (actual time=0.192..0.207 rows=150.00 loops=1)
+                                       Hash Cond: (d.id_sensor = s.id_sensor)
+                                       Buffers: shared hit=30
+                                       ->  Seq Scan on deteccion d  (cost=0.00..78.50 rows=140 width=4) (actual time=0.023..0.125 rows=150.00 loops=1)
+                                             Filter: ((hora_deteccion >= '2026-08-05 00:00:00'::timestamp without time zone) AND (hora_deteccion < '2026-08-06 00:00:00'::timestamp without time zone))
+                                             Rows Removed by Filter: 3350
+                                             Buffers: shared hit=26
+                                       ->  Hash  (cost=7.00..7.00 rows=300 width=23) (actual time=0.053..0.053 rows=300.00 loops=1)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 25kB
+                                             Buffers: shared hit=4
+                                             ->  Seq Scan on sensor s  (cost=0.00..7.00 rows=300 width=23) (actual time=0.005..0.029 rows=300.00 loops=1)
+                                                   Buffers: shared hit=4
+                                 ->  Hash  (cost=3.00..3.00 rows=100 width=19) (actual time=0.027..0.031 rows=100.00 loops=1)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 14kB
+                                       Buffers: shared hit=2
+                                       ->  Seq Scan on estacion_sismica e  (cost=0.00..3.00 rows=100 width=19) (actual time=0.009..0.015 rows=100.00 loops=1)
+                                             Buffers: shared hit=2
+ Settings: search_path = 'monitoreo_sismologico, public'
+ Planning:
+   Buffers: shared hit=63 read=5
+ Planning Time: 0.554 ms
+ Execution Time: 14.109 ms
+(47 rows)
+
+UPDATE 1
+DROP INDEX
+DROP INDEX
+=== EQUIVALENCIA DE RESULTADOS ===
+ consulta | filas_sin | filas_con | resultado 
+----------+-----------+-----------+-----------
+ C1       |        15 |        15 | OK
+ C2       |        10 |        10 | OK
+ C3       |       100 |       100 | OK
+ C4       |        15 |        15 | OK
+ C5       |        15 |        15 | OK
+(5 rows)
+
+psql:../sql/05_planes_indices.sql:678: NOTICE:  OK: cinco consultas equivalentes; indices candidatos retirados
+DO
+
+=== RESTAURAR ESTADO INICIAL ===
+ROLLBACK
+
+=== COMPROBACION FINAL ===
+psql:../sql/05_planes_indices.sql:701: NOTICE:  OK: indices originales preservados
+DO
+=== ETAPA 5 FINALIZADA ===

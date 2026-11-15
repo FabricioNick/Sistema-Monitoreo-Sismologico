@@ -247,7 +247,7 @@ INSERT INTO alerta (
     id_alerta, id_evento, fecha_hora_emision,
     nivel, mensaje, magnitud_estimada, estado
 ) VALUES (900000001, 900000001, TIMESTAMP '2026-01-02 00:00:05',
-          'informativo', 'Prueba de alerta', -0.5, 'emitida');
+          'informativa', 'Prueba de alerta', -0.5, 'emitida');
 
 -- Inserciones de prueba
 SELECT 'estacion_sismica' AS tabla, COUNT(*) AS registros
@@ -264,7 +264,7 @@ WHERE id_sensor = 900000001 AND id_evento = 900000001
 UNION ALL
 SELECT 'alerta', COUNT(*) FROM alerta WHERE id_alerta = 900000001;
 
--- Rechazos esperados
+-- Pruebas de restricciones
 DO $$
 BEGIN
     BEGIN
@@ -350,4 +350,22 @@ SELECT 'alerta', COUNT(*)
 FROM monitoreo_sismologico.alerta
 WHERE id_alerta = 900000001;
 
+
+DO $$
+DECLARE
+    v_total BIGINT;
+BEGIN
+    SELECT (SELECT COUNT(*) FROM monitoreo_sismologico.estacion_sismica)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.sensor)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.lectura_onda)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.evento_sismico)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.deteccion)
+         + (SELECT COUNT(*) FROM monitoreo_sismologico.alerta)
+    INTO v_total;
+    IF v_total <> 0 THEN
+        RAISE EXCEPTION 'El ROLLBACK no restauro las seis tablas vacias: % registros', v_total;
+    END IF;
+    RAISE NOTICE 'OK: las seis tablas permanecen vacias tras ROLLBACK';
+END;
+$$;
 \echo '=== ETAPA 1 FINALIZADA ==='

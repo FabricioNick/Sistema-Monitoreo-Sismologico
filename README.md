@@ -1,64 +1,76 @@
 # Sistema de Monitoreo Sismológico y Alerta Temprana
 
-Proyecto final de **Base de Datos I (CS2041)** — UTEC, 2026-2.
+**Proyecto final — CS2041 Base de Datos I · UTEC · 2026-2**
 
-Implementación de una base de datos relacional en PostgreSQL para el registro y consulta de estaciones sísmicas, sensores, eventos, lecturas, detecciones y alertas. El proyecto integra datos del catálogo oficial del Instituto Geofísico del Perú (IGP) y datos operativos simulados, diferenciando su procedencia.
+Proyecto académico de diseño, implementación y optimización de una base de datos relacional en **PostgreSQL 18** para estaciones sísmicas, sensores, eventos, lecturas, detecciones y alertas. Integra **24 289 eventos del catálogo del Instituto Geofísico del Perú (IGP)** y registros operativos sintéticos, cuya procedencia se distingue en el modelo y las consultas.
 
-## Documentación y entregables
+## Entregables
 
 | Recurso | Contenido |
 |---|---|
-| [Informe final (PDF)](informe/Proyecto_Final.pdf) | Modelos, implementación, consultas, metodología, resultados, análisis y anexos |
-| [SQL](sql/) | Scripts de estructura, carga, vistas, procedimientos, triggers, consultas y experimentación |
-| [Resultados CSV](sql/resultados/) | Mediciones experimentales, consolidado de las veinte comparaciones y exportación del MVP |
-| [MVP web](MVP_Web_Sismologico/) | Aplicación local de solo lectura que ejecuta las cinco consultas SQL |
-| [Herramientas](herramientas/) | Utilidades para exportación, diagnóstico y restauración de respaldos |
-| [Respaldos experimentales](https://github.com/FabricioNick/Sistema-Monitoreo-Sismologico/releases/tag/v1.0.0) | Cuatro archivos `.dump` correspondientes a las cuatro escalas |
-| [Demostración audiovisual](https://drive.google.com/drive/folders/1gb3Di7rx0eWwd05cC3xbw3DJxhjgS2t4?usp=sharing) | Carpeta de Drive destinada a la comparación experimental sobre un millón de registros |
+| [Informe final (PDF)](informe/Proyecto_Final.pdf) | Requisitos, modelos, implementación, consultas, experimentación y conclusiones |
+| [SQL definitivos](sql/) | Siete integradores de implementación y experimentación |
+| [Resultados experimentales](resultados/mediciones/) | 25 archivos CSV: cinco consultas por cinco escalas |
+| [Resumen de las 25 comparaciones](resultados/resumen_25_comparaciones.csv) | Métricas consolidadas de rendimiento |
+| [Planes de ejecución](resultados/planes_json/) | Planes JSON con y sin índices secundarios candidatos |
+| [Registros de ejecución](resultados/registros_ejecucion/) | Salidas técnicas de implementación, planes, mediciones y demostración |
+| [Herramientas](herramientas/) | Scripts de medición, respaldo y verificación |
+| [Respaldos PostgreSQL — Release v1.0.0](https://github.com/FabricioNick/Sistema-Monitoreo-Sismologico/releases/tag/v1.0.0) | Cuatro archivos `.dump` de las escalas exigidas |
+| [Videos de experimentación — Google Drive](https://drive.google.com/drive/folders/1gb3Di7rx0eWwd05cC3xbw3DJxhjgS2t4?usp=sharing) | Carpeta destinada a las grabaciones; comprobar disponibilidad después de su publicación |
 
-Las evidencias gráficas, tablas de resultados y planes de ejecución están en el informe PDF. En `sql/resultados/` se conservan el resumen histórico `59_resumen_global_5_6.csv` (serie principal), `C5_resultados_mvp.csv` (exportación del prototipo) y los CSV `06_C*.csv` (segunda ejecución experimental). Las series de medición son distintas y no se combinan.
+## Consultas y experimentación
 
-## Experimento de optimización
+Se estudian cinco consultas SQL intermedias:
 
-Se estudiaron cinco consultas no triviales (C1–C5) sobre cuatro escalas: **1 000, 10 000, 100 000 y 1 000 000 de registros**, comparando los escenarios sin y con índices secundarios.
-
-- **C1:** actividad sísmica anual.
-- **C2:** eventos en ventanas geográficas.
-- **C3:** calidad de las lecturas por estación.
-- **C4:** primera detección y primera alerta por evento.
-- **C5:** sensores con lecturas y sin detecciones.
-
-La evaluación contempla índices seleccionados por consulta, planes de ejecución y mediciones repetidas. El informe diferencia las mejoras observadas de los escenarios en los que los índices no se utilizaron o no redujeron el tiempo de ejecución.
-
-## Implementación SQL
-
-Los archivos de entrada se encuentran en [`sql/`](sql/):
-
-| Archivo | Propósito |
+| Consulta | Objetivo |
 |---|---|
-| `01_estructura.sql` | Tablas y restricciones |
-| `02_datos.sql` | Carga de información y verificaciones |
-| `03_logica_consultas.sql` | Vistas, procedimientos, triggers y consultas |
-| `04_bases_experimentales.sql` | Escalas experimentales |
-| `05_planes_indices.sql` | Planes de ejecución e índices candidatos |
-| `06_mediciones.sql` | Medición de rendimiento |
-| `07_demostracion_video.sql` | Comparación demostrativa de C1–C5 en la escala mayor |
+| **C1** | Actividad sísmica anual registrada por el IGP |
+| **C2** | Eventos del IGP en ventanas geográficas alrededor de estaciones |
+| **C3** | Calidad de lecturas válidas e inválidas por estación |
+| **C4** | Primera detección y primera alerta asociadas a eventos simulados |
+| **C5** | Sensores con lecturas, pero sin detecciones en el periodo analizado |
 
-Los integradores requieren PostgreSQL y `psql`; algunos presuponen datos e índices previamente preparados. No son scripts de inicialización idempotentes para ejecutar indiscriminadamente en una base ya poblada.
+Se trabajó con **cinco escalas** de 100, 1 000, 10 000, 100 000 y 1 000 000 de registros totales. Las cuatro últimas corresponden a las escalas solicitadas; la de 100 registros es adicional.
 
-## Aplicación web
+Para cada consulta y escala se compararon escenarios **sin índices secundarios candidatos** y **con índices secundarios candidatos disponibles**. Los índices de integridad, como los asociados a claves primarias y restricciones `UNIQUE`, se mantienen. La disponibilidad de un índice no implica que el planificador PostgreSQL lo utilice.
 
-El [MVP web](MVP_Web_Sismologico/README.md) usa Node.js y `pg` para ejecutar C1–C5 sobre PostgreSQL en modo de solo lectura. Incluye resultados tabulares, filtros y exportación CSV. La configuración privada de conexión se mantiene fuera del control de versiones.
+El experimento definitivo contiene **25 comparaciones, 250 mediciones útiles y 100 calentamientos**, documentados en los CSV y registros técnicos. Los tiempos de consulta evaluados en el informe no deben confundirse con los tiempos HTTP de una aplicación web.
 
-## Fuentes de datos y alcance
+## Archivos SQL
 
-- [Catálogo sísmico del IGP](https://censis.igp.gob.pe/repositorio/datos-sismicos)
-- [Documentación de PostgreSQL](https://www.postgresql.org/docs/)
+Los integradores completos están disponibles directamente en este repositorio:
 
-Los datos sintéticos no deben interpretarse como observaciones instrumentales reales. Las conclusiones de rendimiento se limitan a los datos, al equipo y al protocolo de experimentación documentados en el informe.
+1. [`01_estructura.sql`](sql/01_estructura.sql) — tablas y restricciones.
+2. [`02_datos.sql`](sql/02_datos.sql) — carga inicial e incorporación del catálogo IGP.
+3. [`03_logica_consultas.sql`](sql/03_logica_consultas.sql) — vistas, procedimientos, triggers y consultas C1–C5.
+4. [`04_bases_experimentales.sql`](sql/04_bases_experimentales.sql) — preparación de las escalas de prueba.
+5. [`05_planes_indices.sql`](sql/05_planes_indices.sql) — índices candidatos y planes de ejecución.
+6. [`06_mediciones.sql`](sql/06_mediciones.sql) — calentamientos, mediciones y validaciones.
+7. [`07_demostracion_video.sql`](sql/07_demostracion_video.sql) — ejecución demostrativa para la escala mayor.
 
-## Evidencia de reproducibilidad
+Los scripts tienen prerrequisitos y deben ejecutarse sobre las bases correspondientes. **No se deben ejecutar indiscriminadamente sobre una base ya poblada.** El conjunto de mediciones y sus planes está disponible para consulta sin repetir el experimento.
 
-- [CSV historicos de mediciones](sql/resultados/historicos/): 21 archivos originales que respaldan las 20 comparaciones de la serie principal.
-- [Verificacion de implementacion](herramientas/Verificacion_Implementacion.sql) y [salida de PostgreSQL](sql/resultados/Salida_Verificacion_Implementacion.txt): recuentos, objetos e integridad comprobados.
-- Las mediciones `06_C*.csv` corresponden a una segunda serie experimental independiente.
+El archivo [`sql/datos/igp_catalogo.csv`](sql/datos/igp_catalogo.csv) contiene los datos del catálogo IGP utilizados en la carga. Fuente: [repositorio de datos sísmicos del IGP](https://censis.igp.gob.pe/repositorio/datos-sismicos).
+
+## MVP web — demostración temporal
+
+Se desarrolló un **MVP web responsive** con Node.js y PostgreSQL que permite seleccionar y ejecutar las cinco consultas intermedias, visualizar tablas y gráficos, y exportar resultados a CSV. Se utiliza **localmente en la laptop de exposición**, con acceso externo mediante un túnel HTTPS de ngrok.
+
+**Enlace de demostración:** [Observatorio Sismológico](https://routing-writing-deprive.ngrok-free.dev)
+
+Este enlace **solo estará disponible cuando la laptop, PostgreSQL, el servidor Node.js y ngrok estén encendidos**, principalmente durante la exposición. El código del MVP se mantiene fuera de este repositorio, conforme al alcance de la demostración académica. La aplicación ejecuta consultas de solo lectura y no constituye un sistema operativo de alerta sísmica en producción.
+
+## Respaldos y reproducibilidad
+
+Los cuatro archivos PostgreSQL `.dump` están publicados **únicamente como adjuntos de [GitHub Releases v1.0.0](https://github.com/FabricioNick/Sistema-Monitoreo-Sismologico/releases/tag/v1.0.0)**, no duplicados en el historial de Git:
+
+- `bd_sismologico_exp_1000.dump`
+- `bd_sismologico_exp_10000.dump`
+- `bd_sismologico_exp_100000.dump`
+- `bd_sismologico_exp_1000000.dump`
+
+Los respaldos se pueden inspeccionar mediante `pg_restore --list`; una restauración de prueba independiente constituye una comprobación adicional de integridad. El repositorio conserva los SQL, resultados experimentales y herramientas para facilitar la revisión del proyecto.
+
+## Alcance
+
+Los eventos oficiales proceden del IGP; los datos operativos simulados no representan detecciones ni alertas instrumentales reales. Las conclusiones de rendimiento corresponden a las escalas, al equipo y al protocolo de medición documentados en el informe. El estudio de escalas superiores al millón se presenta como discusión teórica, no como medición adicional.
